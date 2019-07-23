@@ -1,0 +1,28 @@
+---
+# defaults file for ansible-role-burpsuite
+
+# Which Burp Suite product type? community or pro
+burpsuite_product_type: community
+
+# Burp Suite version to install
+burpsuite_version: "2.1.01"
+
+# Location to save the Burp Suite CA certificate
+burpsuite_cacert_path: "{{ burpsuite_extras_dir }}/portswigger-ca.der"
+
+# Directory for Burp Suite extras
+burpsuite_extras_dir: /opt/BurpSuiteExtras
+
+# Location of Burp Suite installer script
+# Community version will be downloaded to this location
+burpsuite_installer_dir: "/tmp"
+
+# URLs and checksums for Jruby and Jython jar files
+burpsuite_jruby_jar_url: "https://repo1.maven.org/maven2/org/jruby/jruby-complete/9.2.5.0/jruby-complete-9.2.5.0.jar"
+burpsuite_jruby_jar_checksum: "c43308e2357eb906acc54405656f5abd820dd4af"
+burpsuite_jython_jar_url: "https://repo1.maven.org/maven2/org/python/jython-standalone/2.7.1/jython-standalone-2.7.1.jar"
+burpsuite_jython_jar_checksum: "942c3294840dc9dfb3528d775f4d02a6d57c421f"
+
+# Location of the Burp Suite Pro license file
+# Required for Burp Suite Pro
+burpsuite_license_path: ""

@@ -1,0 +1,52 @@
+---
+# tasks file for ansible-role-burpsuite
+
+- name: Install required packages
+  apt:
+    name: "{{ burpsuite_packages }}"
+    state: present
+
+- name: Deploy Burp Suite Community via Kali repo
+  include: kali_install.yml
+  when: "'Kali' in ansible_distribution and burpsuite_product_type == 'community'"
+
+- name: Deploy via installer script
+  include: installer.yml
+  when: "'Kali' not in ansible_distribution or burpsuite_product_type == 'pro'"
+
+- name: Create directory for Burp Suite extras
+  file:
+    path: "{{ burpsuite_extras_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Download JRuby for Burp Suite
+  get_url:
+    url: "{{ burpsuite_jruby_jar_url }}"
+    dest: "{{ burpsuite_extras_dir }}/jruby-complete.jar"
+    checksum: "sha1:{{ burpsuite_jruby_jar_checksum }}"
+
+- name: Download Jython for Burp Suite
+  get_url:
+    url: "{{ burpsuite_jython_jar_url }}"
+    dest: "{{ burpsuite_extras_dir }}/jython-standalone.jar"
+    checksum: "sha1:{{ burpsuite_jython_jar_checksum }}"
+
+- name: Create license_burp.py script
+  template:
+    src: license_burp.py.j2
+    dest: "{{ burpsuite_extras_dir }}/license_burp.py"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Configure Burp Suite
+  command: python3 license_burp.py
+  args:
+    chdir: "{{ burpsuite_extras_dir }}"
+  register: configure_burp
+  changed_when: >
+    "'Terms and conditions accepted.' in configure_burp.stdout or
+    'License successfully installed and activated.' in configure_burp.stdout"

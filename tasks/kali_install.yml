@@ -1,0 +1,12 @@
+---
+# tasks file for ansible-role-burpsuite
+
+- name: Deploy via Kali repository
+  apt:
+    name: burpsuite
+    state: present
+
+- name: Set facts for Burp Suite Community
+  set_fact:
+    burpsuite_jar_path: "/usr/bin/burpsuite"
+    burpsuite_java_path: "/usr/bin/java"
