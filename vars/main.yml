@@ -1,21 +1,8 @@
 ---
 # vars file for ansible-role-burpsuite
 
-# Required packages for Burp Suite
 burpsuite_packages:
   - libfreetype6
   - libfontconfig1
   - python3
   - python3-pexpect
-
-# Defaults for Burp Suite Community
-burpsuite_community_url: "https://portswigger.net/burp/releases/download?product=community&type=linux&version="
-
-_burpsuite_community_dir: /opt/BurpSuiteCommunity
-_burpsuite_community_java_path: "{{ _burpsuite_community_dir }}/jre/bin/java"
-_burpsuite_community_jar_path: "{{ _burpsuite_community_dir }}/burpsuite_community.jar"
-
-# Defaults for Burp Suite Pro
-_burpsuite_pro_dir: /opt/BurpSuitePro
-_burpsuite_pro_java_path: "{{ _burpsuite_pro_dir }}/jre/bin/java"
-_burpsuite_pro_jar_path: "{{ _burpsuite_pro_dir }}/burpsuite_pro.jar"

@@ -6,20 +6,52 @@
     name: "{{ burpsuite_packages }}"
     state: present
 
-- name: Deploy Burp Suite Community via Kali repo
-  include: kali_install.yml
-  when: "'Kali' in ansible_distribution and burpsuite_product_type == 'community'"
+- name: Check if previously installed
+  stat:
+    path: "{{ burpsuite_dir }}/.install4j/i4jparams.conf"
+  register: install4j_config_file
 
-- name: Deploy via installer script
-  include: installer.yml
-  when: "'Kali' not in ansible_distribution or burpsuite_product_type == 'pro'"
+- name: Read install4j config file
+  slurp:
+    src: "{{ burpsuite_dir }}/.install4j/i4jparams.conf"
+  register: install4j_config_contents
+  when: install4j_config_file.stat.exists
+
+- name: Get current version
+  set_fact:
+    installed_version: "{{ install4j_config_contents.content | b64decode |
+        regex_search('applicationVersion=\"[0-9.]+\"', multiline=True) |
+        regex_replace('applicationVersion=\"([0-9.]+)\"', '\\1') }}"
+  when: install4j_config_file.stat.exists
+
+- block:
+    - name: Set facts for Burp Suite
+      set_fact:
+        burpsuite_installer_script: "burpsuite_{{ burpsuite_product_type }}_linux_{{ burpsuite_version }}.sh"
+
+    - name: Download Burp Suite Community
+      get_url:
+        url: "{{ burpsuite_community_download_url }}"
+        dest: "{{ burpsuite_installer_dir }}/{{ burpsuite_installer_script }}"
+        mode: "0440"
+        checksum: "sha256:{{ burpsuite_community_download_checksum }}"        
+      when: burpsuite_community_download_enabled
+
+    - name: Create response.varfile for unattended install
+      template:
+        src: burpsuite_response.varfile.j2
+        dest: "{{ burpsuite_installer_dir }}/burpsuite_response.varfile"
+
+    - name: Install Burp Suite
+      command: "/bin/sh {{ burpsuite_installer_script }} -q -varfile burpsuite_response.varfile -overwrite"
+      args:
+        chdir: "{{ burpsuite_installer_dir }}"
+  when: installed_version is not defined or installed_version != burpsuite_version
 
 - name: Create directory for Burp Suite extras
   file:
     path: "{{ burpsuite_extras_dir }}"
     state: directory
-    owner: root
-    group: root
     mode: 0755
 
 - name: Download JRuby for Burp Suite
@@ -34,19 +66,30 @@
     dest: "{{ burpsuite_extras_dir }}/jython-standalone.jar"
     checksum: "sha1:{{ burpsuite_jython_jar_checksum }}"
 
-- name: Create license_burp.py script
-  template:
-    src: license_burp.py.j2
+- name: Copy license_burp.py script to extras directory
+  copy:
+    src: license_burp.py
     dest: "{{ burpsuite_extras_dir }}/license_burp.py"
-    owner: root
-    group: root
     mode: 0644
 
-- name: Configure Burp Suite
-  command: python3 license_burp.py
+- name: Accept Burp Suite agreement/license
+  command: "python3 license_burp.py {{ burpsuite_product_type }} {{ burpsuite_dir }} {{ burpsuite_license_path }}"
   args:
     chdir: "{{ burpsuite_extras_dir }}"
-  register: configure_burp
-  changed_when: >
-    "'Terms and conditions accepted.' in configure_burp.stdout or
-    'License successfully installed and activated.' in configure_burp.stdout"
+  register: license_burp
+  changed_when: "'Terms and conditions accepted.' in license_burp.stdout or
+    'License successfully installed and activated.' in license_burp.stdout"
+
+- name: Copy download_ca_cert.py script to extras directory
+  copy:
+    src: download_ca_cert.py
+    dest: "{{ burpsuite_extras_dir }}/download_ca_cert.py"
+    mode: 0644
+
+- name: Download Burp Suite CA certificate
+  command: "python3 download_ca_cert.py {{ burpsuite_product_type }} {{ burpsuite_dir }} {{ burpsuite_cacert_path }}"
+  args:
+    chdir: "{{ burpsuite_extras_dir }}"
+  register: download_ca_cert
+  changed_when: "'CA Certificate updated' in download_ca_cert.stdout or
+    'CA Certificate saved.' in download_ca_cert.stdout"
