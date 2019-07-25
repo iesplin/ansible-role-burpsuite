@@ -51,6 +51,14 @@
       command: "/bin/sh {{ burpsuite_installer_script }} -q -varfile burpsuite_response.varfile -overwrite"
       args:
         chdir: "{{ burpsuite_installer_dir }}"
+    
+    - name: Remove installation files
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ burpsuite_installer_dir }}/{{ burpsuite_installer_script }}"
+        - "{{ burpsuite_installer_dir }}/burpsuite_response.varfile"
   when: installed_version is not defined or installed_version != burpsuite_version
 
 - name: Create directory for Burp Suite extras
