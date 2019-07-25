@@ -6,6 +6,11 @@
     name: "{{ burpsuite_packages }}"
     state: present
 
+- name: Remove Kali burpsuite package if installed
+  apt:
+    name: burpsuite
+    state: absent
+
 - name: Check if previously installed
   stat:
     path: "{{ burpsuite_dir }}/.install4j/i4jparams.conf"
