@@ -13,13 +13,15 @@ burpsuite_cacert_path: "/etc/ssl/certs/PortSwigger_CA.der"
 # Download URL for Burp Suite Community
 burpsuite_community_download_enabled: true
 burpsuite_community_download_url: "https://portswigger.net/burp/releases/download?product=community&type=linux&version={{ burpsuite_version }}"
-burpsuite_community_download_checksum: "48008f15285a39abf7f08a24dfcf775bd0815622610c6277115ea91ad9e50ba2"
 
 # Directory to install Burp Suite into
 burpsuite_dir: /opt/BurpSuiteCommunity
 
 # Directory for Burp Suite extras
 burpsuite_extras_dir: /opt/BurpSuiteExtras
+
+# Checksum for the burpsuite_installer script
+burpsuite_installer_checksum: "48008f15285a39abf7f08a24dfcf775bd0815622610c6277115ea91ad9e50ba2"
 
 # Location of Burp Suite installer script
 # Community version will be downloaded to this location
