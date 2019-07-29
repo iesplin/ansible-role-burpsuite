@@ -129,7 +129,7 @@
   copy:
     src: /tmp/cacert.der
     dest: "{{ burpsuite_cacert_path }}"
-    remote: yes
+    remote_src: true
     owner: root
     group: root
     mode: 0640
