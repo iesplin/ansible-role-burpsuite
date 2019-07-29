@@ -32,7 +32,7 @@
 - block:
     - name: Set facts for Burp Suite
       set_fact:
-        burpsuite_installer_script: "burpsuite_{{ burpsuite_product_type }}_linux_{{ burpsuite_version }}.sh"
+        burpsuite_installer_script: "burpsuite_{{ burpsuite_product_type }}_linux_{{ burpsuite_version | regex_replace('.', '_')}}.sh"
 
     - name: Download Burp Suite Community
       get_url:
