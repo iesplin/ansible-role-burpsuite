@@ -5,11 +5,13 @@
   apt:
     name: "{{ burpsuite_packages }}"
     state: present
+  become: true
 
 - name: Remove Kali burpsuite package if installed
   apt:
     name: burpsuite
     state: absent
+  become: true
 
 - name: Check if previously installed
   stat:
@@ -65,12 +67,15 @@
       command: "/bin/sh {{ burpsuite_installer_script }} -q -varfile burpsuite_response.varfile -overwrite"
       args:
         chdir: "{{ burpsuite_installer_dir }}"
-    
+      become: true
+
     - name: Remove Burp Suite Community installer
       file:
         path: "{{ burpsuite_installer_dir }}/{{ burpsuite_installer_script }}"
         state: absent
-      when: burpsuite_community_download_enabled
+      when:
+        - burpsuite_community_download_enabled
+        - burpsuite_product_type == 'community'
 
     - name: Remove response.varfile 
       file:
@@ -83,24 +88,28 @@
     path: "{{ burpsuite_extras_dir }}"
     state: directory
     mode: 0755
+  become: true
 
 - name: Download JRuby for Burp Suite
   get_url:
     url: "{{ burpsuite_jruby_jar_url }}"
     dest: "{{ burpsuite_extras_dir }}/jruby-complete.jar"
     checksum: "sha1:{{ burpsuite_jruby_jar_checksum }}"
+  become: true
 
 - name: Download Jython for Burp Suite
   get_url:
     url: "{{ burpsuite_jython_jar_url }}"
     dest: "{{ burpsuite_extras_dir }}/jython-standalone.jar"
     checksum: "sha1:{{ burpsuite_jython_jar_checksum }}"
+  become: true
 
 - name: Copy license_burp.py script to extras directory
   copy:
     src: license_burp.py
     dest: "{{ burpsuite_extras_dir }}/license_burp.py"
     mode: 0644
+  become: true
 
 - name: Accept Burp Suite agreement/license
   command: "python3 license_burp.py --license '{{ burpsuite_license_path }}' {{ burpsuite_product_type }} {{ burpsuite_dir }}"
@@ -115,11 +124,13 @@
     src: download_ca_cert.py
     dest: "{{ burpsuite_extras_dir }}/download_ca_cert.py"
     mode: 0644
+  become: true
 
-- name: Download Burp Suite CA certificate
+- name: Download CA certificate to /etc/ssl/certs directory
   command: "python3 download_ca_cert.py {{ burpsuite_product_type }} {{ burpsuite_dir }} {{ burpsuite_cacert_path }}"
   args:
     chdir: "{{ burpsuite_extras_dir }}"
   register: download_ca_cert
   changed_when: "'CA Certificate updated' in download_ca_cert.stdout or
     'CA Certificate saved.' in download_ca_cert.stdout"
+  become: true

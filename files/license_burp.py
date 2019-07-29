@@ -46,6 +46,7 @@ try:
             print('License successfully installed and activated.')
             break
         elif i == 5:
+            print('License successfully installed and activated.')
             break
         else:
             print('Unexpected expect!')
