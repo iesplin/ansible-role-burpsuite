@@ -1,13 +1,19 @@
 ---
 # defaults file for ansible-role-burpsuite
 
+# Burp Suite version to install
+burpsuite_version: "2.1.02"
+
+# Which Burp Suite product type? community or pro
+burpsuite_product_type: community
+
 # Location to save the Burp Suite CA certificate
 burpsuite_cacert_path: "/etc/ssl/certs/PortSwigger_CA.der"
 
 # Download URL for Burp Suite Community
 burpsuite_community_download_enabled: true
 burpsuite_community_download_url: "https://portswigger.net/burp/releases/download?product=community&type=linux&version={{ burpsuite_version }}"
-burpsuite_community_download_checksum: "a9e8b7a42fb17adb718f42697dac9dd2e0404caa9990068a4f08af63fa0271a6"
+burpsuite_community_download_checksum: "48008f15285a39abf7f08a24dfcf775bd0815622610c6277115ea91ad9e50ba2"
 
 # Directory to install Burp Suite into
 burpsuite_dir: /opt/BurpSuiteCommunity
@@ -28,9 +34,3 @@ burpsuite_jython_jar_checksum: "942c3294840dc9dfb3528d775f4d02a6d57c421f"
 # Location of the Burp Suite Pro license file
 # Only required for Burp Suite Pro
 burpsuite_license_path: ""
-
-# Which Burp Suite product type? community or pro
-burpsuite_product_type: community
-
-# Burp Suite version to install
-burpsuite_version: "2.1.01"
