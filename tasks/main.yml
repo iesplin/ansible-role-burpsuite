@@ -104,7 +104,7 @@
     dest: "{{ burpsuite_extras_dir }}/license_burp.py"
     mode: 0644
 
-- name: Accept Burp Suite agreement/license
+- name: Accept Burp Suite license agreement/terms and conditions
   command: "python3 license_burp.py --license '{{ burpsuite_license_path }}' {{ burpsuite_product_type }} {{ burpsuite_dir }}"
   args:
     chdir: "{{ burpsuite_extras_dir }}"
@@ -119,7 +119,7 @@
     dest: "{{ burpsuite_extras_dir }}/download_ca_cert.py"
     mode: 0644
 
-- name: Download CA certificate to /tmp directory
+- name: Download CA certificate to /tmp/cacert.der
   command: "python3 download_ca_cert.py {{ burpsuite_product_type }} {{ burpsuite_dir }} /tmp/cacert.der"
   args:
     chdir: "{{ burpsuite_extras_dir }}"
@@ -133,7 +133,7 @@
     remote_src: true
     mode: 0644
 
-- name: Remove cacert.der
+- name: Remove /tmp/cacert.der
   file:
     path: /tmp/cacert.der
     state: absent
