@@ -52,7 +52,7 @@
     - name: Assert that checksum is correct
       assert:
         that:
-          - burpsuite_installer_checksum == installer_script.checksum
+          - burpsuite_installer_checksum == installer_script.stat.checksum
         fail_msg: "Burp Suite installer checksum is invalid"
         success_msg: "Burp Suite installer checksum is valid"
 
