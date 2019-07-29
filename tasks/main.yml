@@ -123,6 +123,7 @@
   command: "python3 download_ca_cert.py {{ burpsuite_product_type }} {{ burpsuite_dir }} /tmp/cacert.der"
   args:
     chdir: "{{ burpsuite_extras_dir }}"
+  changed_when: false
   become: false
 
 - name: Copy CA certificate to {{ burpsuite_cacert_path }}
@@ -138,3 +139,4 @@
   file:
     path: /tmp/cacert.der
     state: absent
+    changed_when: false
