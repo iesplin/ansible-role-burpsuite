@@ -137,4 +137,4 @@
   file:
     path: /tmp/cacert.der
     state: absent
-    changed_when: false
+  changed_when: false
