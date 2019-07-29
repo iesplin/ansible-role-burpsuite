@@ -39,20 +39,20 @@
         url: "{{ burpsuite_community_download_url }}"
         dest: "{{ burpsuite_installer_dir }}/{{ burpsuite_installer_script }}"
         mode: "0440"
-        checksum: "sha256:{{ burpsuite_installer_checksum }}"       
-      when: burpsuite_community_download_enabled
+      when:
+        - burpsuite_community_download_enabled
+        - burpsuite_product_type == 'community'
 
     - name: Get file checksum
       stat:
         path: "{{ burpsuite_installer_dir }}/{{ burpsuite_installer_script }}"
         checksum: sha256
-      register: installer_stat
-      when: not burpsuite_community_download_enabled 
+      register: installer_script
 
     - name: Assert that checksum is correct
       assert:
         that:
-          - burpsuite_installer_checksum == installer_stat.checksum
+          - burpsuite_installer_checksum == installer_script.checksum
         fail_msg: "Burp Suite installer checksum is invalid"
         success_msg: "Burp Suite installer checksum is valid"
 
