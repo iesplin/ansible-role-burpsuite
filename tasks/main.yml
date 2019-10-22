@@ -131,3 +131,18 @@
     src: UserConfig.json.j2
     dest: "{{ burpsuite_extras_dir }}/UserConfig.json"
     mode: 0644
+
+- name: Find any pre-existing Burp Suite desktop files
+  find:
+    paths: /usr/share/applications
+    patterns: "Burp\\sSuite\\s(Community\\sEdition|Professional).*\\.desktop"
+    file_type: file
+    use_regex: true
+  register: burpsuite_desktop_files
+
+- name: Map windows to the Burp Suite launcher
+  lineinfile:
+    path: "{{ item.path }}"
+    regex: "^StartupWMClass="
+    line: "StartupWMClass=com-install4j-runtime-launcher-UnixLauncher"
+  loop: "{{ burpsuite_desktop_files.files }}"
