@@ -104,27 +104,11 @@
     dest: "{{ burpsuite_extras_dir }}/license_burp.py"
     mode: 0644
 
-- name: Accept Burp Suite license agreement/terms and conditions
-  command: "python3 license_burp.py --license '{{ burpsuite_license_path }}' {{ burpsuite_product_type }} {{ burpsuite_dir }}"
-  args:
-    chdir: "{{ burpsuite_extras_dir }}"
-  register: license_burp
-  changed_when: "'Terms and conditions accepted.' in license_burp.stdout or
-    'License successfully installed and activated.' in license_burp.stdout"
-  become: false
-
 - name: Copy download_ca_cert.py script to extras directory
   copy:
     src: download_ca_cert.py
     dest: "{{ burpsuite_extras_dir }}/download_ca_cert.py"
     mode: 0644
-
-- name: Download CA certificate to /tmp/cacert.der
-  command: "python3 download_ca_cert.py {{ burpsuite_product_type }} {{ burpsuite_dir }} {{ burpsuite_cacert_path }}"
-  args:
-    chdir: "{{ burpsuite_extras_dir }}"
-  changed_when: false
-  become: false
 
 - name: Create example user config in extras directory
   template:
