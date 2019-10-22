@@ -120,21 +120,8 @@
     mode: 0644
 
 - name: Download CA certificate to /tmp/cacert.der
-  command: "python3 download_ca_cert.py {{ burpsuite_product_type }} {{ burpsuite_dir }} /tmp/cacert.der"
+  command: "python3 download_ca_cert.py {{ burpsuite_product_type }} {{ burpsuite_dir }} {{ burpsuite_cacert_path }}"
   args:
     chdir: "{{ burpsuite_extras_dir }}"
   changed_when: false
   become: false
-
-- name: Copy CA certificate to {{ burpsuite_cacert_path }}
-  copy:
-    src: /tmp/cacert.der
-    dest: "{{ burpsuite_cacert_path }}"
-    remote_src: true
-    mode: 0644
-
-- name: Remove /tmp/cacert.der
-  file:
-    path: /tmp/cacert.der
-    state: absent
-  changed_when: false
