@@ -125,3 +125,9 @@
     chdir: "{{ burpsuite_extras_dir }}"
   changed_when: false
   become: false
+
+- name: Create example user config in extras directory
+  template:
+    src: UserConfig.json.j2
+    dest: "{{ burpsuite_extras_dir }}/UserConfig.json"
+    mode: 0644
