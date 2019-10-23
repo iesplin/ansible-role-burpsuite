@@ -4,28 +4,26 @@
 # Burp Suite version to install
 burpsuite_version: "2.1.04"
 
-# Which Burp Suite product type? community or pro
+# Which Burp Suite product type. Valid values are 'community' or 'pro'
 burpsuite_product_type: community
 
-# Location to save the Burp Suite CA certificate
-burpsuite_cacert_path: "/etc/ssl/certs/PortSwigger_CA.der"
-
-# Download URL for Burp Suite Community
-burpsuite_community_download_enabled: true
-burpsuite_community_download_url: "https://portswigger.net/burp/releases/download?product=community&type=linux&version={{ burpsuite_version }}"
-
-# Directory to install Burp Suite into
+# Directory to install Burp Suite
 burpsuite_dir: /opt/BurpSuiteCommunity
 
-# Directory for Burp Suite extras
-burpsuite_extras_dir: /opt/BurpSuiteExtras
+# Directory where Burp Suite installer is located.
+burpsuite_installer_dir: /tmp
+
+# Download URL for Burp Suite Community if Community installer is not found
+burpsuite_community_download_url: "https://portswigger.net/burp/releases/download?product=community&type=linux&version={{ burpsuite_version }}"
 
 # Checksum for the burpsuite_installer script
 burpsuite_installer_checksum: "1a74519b7842bbcfb64e052112b8a6d312b8fe055d72abd9265c0c39e9f3407e"
 
-# Location of Burp Suite installer script
-# Community version will be downloaded to this location
-burpsuite_installer_dir: /tmp
+# Directory for Burp Suite extras
+burpsuite_extras_dir: /opt/BurpSuiteExtras
+
+# User for activation of Burp Suite, download CA cert, user config
+burpsuite_user: root
 
 # URLs and checksums for Jruby and Jython jar files
 burpsuite_jruby_jar_url: "https://repo1.maven.org/maven2/org/jruby/jruby-complete/9.2.5.0/jruby-complete-9.2.5.0.jar"
@@ -33,6 +31,11 @@ burpsuite_jruby_jar_checksum: "c43308e2357eb906acc54405656f5abd820dd4af"
 burpsuite_jython_jar_url: "https://repo1.maven.org/maven2/org/python/jython-standalone/2.7.1/jython-standalone-2.7.1.jar"
 burpsuite_jython_jar_checksum: "942c3294840dc9dfb3528d775f4d02a6d57c421f"
 
-# Location of the Burp Suite Pro license file
-# Only required for Burp Suite Pro
-burpsuite_license_path: ""
+# Path to the Burp Suite Pro license file
+burpsuite_pro_license_path: ""
+
+# Location to save the Burp Suite CA certificate
+burpsuite_cacert_path: "/etc/ssl/certs/PortSwigger_CA.der"
+
+# Create a user config for the user specified in burpsuite_user
+burpsuite_create_user_config: true

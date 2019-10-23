@@ -1,0 +1,80 @@
+---
+# Tasks for extra jars and scripts for Burp Suite
+
+- name: Create directory for Burp Suite extras
+  file:
+    path: "{{ burpsuite_extras_dir }}"
+    state: directory
+    mode: 0755
+
+- name: Download JRuby for Burp Suite
+  get_url:
+    url: "{{ burpsuite_jruby_jar_url }}"
+    dest: "{{ burpsuite_extras_dir }}/jruby-complete.jar"
+    checksum: "sha1:{{ burpsuite_jruby_jar_checksum }}"
+
+- name: Download Jython for Burp Suite
+  get_url:
+    url: "{{ burpsuite_jython_jar_url }}"
+    dest: "{{ burpsuite_extras_dir }}/jython-standalone.jar"
+    checksum: "sha1:{{ burpsuite_jython_jar_checksum }}"
+
+- name: Copy license_burp.py script to extras directory
+  copy:
+    src: license_burp.py
+    dest: "{{ burpsuite_extras_dir }}/license_burp.py"
+    mode: 0644
+
+- name: Copy download_ca_cert.py script to extras directory
+  copy:
+    src: download_ca_cert.py
+    dest: "{{ burpsuite_extras_dir }}/download_ca_cert.py"
+    mode: 0644
+
+- name: Accept Burp Suite license agreement/terms and conditions
+  command: "python3 license_burp.py --license '{{ burpsuite_pro_license_path }}' {{ burpsuite_dir }}"
+  args:
+    chdir: "{{ burpsuite_extras_dir }}"
+  register: license_burp
+  changed_when: "'Terms and conditions accepted.' in license_burp.stdout or
+    'License successfully installed and activated.' in license_burp.stdout"
+  become: true
+  become_user: "{{ burpsuite_user }}"
+
+- name: Download CA certificate to /tmp/ca.der
+  command: "python3 download_ca_cert.py {{ burpsuite_dir }} /tmp/burp_ca.der"
+  args:
+    chdir: "{{ burpsuite_extras_dir }}"
+  become: true
+  become_user: "{{ burpsuite_user }}"
+
+- name: Copy CA certificate to {{ burpsuite_cacert_path }}
+  copy:
+    src: /tmp/burp_ca.der
+    dest: "{{ burpsuite_cacert_path }}"
+    remote_src: true
+    mode: 0644
+
+- name: Remove /tmp/cacert.der
+  file:
+    path: /tmp/cacert.der
+    state: absent
+  changed_when: false
+  become: true
+  become_user: "{{ burpsuite_user }}"
+
+- name: Ensure ~/.BurpSuite directory exists
+  file:
+    path: ~/.BurpSuite
+    state: directory
+    mode: 0700
+  become: true
+  become_user: "{{ burpsuite_user }}"
+
+- name: Create example user config in extras directory
+  template:
+    src: UserConfig.json.j2
+    dest: "~/.BurpSuite/UserConfig{{ burpsuite_product_type | capitalize }}.json"
+    mode: 0600
+  become: true
+  become_user: "{{ burpsuite_user }}"

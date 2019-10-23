@@ -1,5 +1,4 @@
 import argparse
-import glob
 import os
 import pexpect.popen_spawn
 import signal
@@ -24,7 +23,7 @@ expect_options = [
     'Proxy service started'
     ]
 
-burp_jar_files = glob.glob(os.path.join(args.burpdir, "burpsuite_*.jar"))
+burp_jar_files = [ f for f in os.listdir(args.burpdir) if f.startswith("burpsuite_") and f.endswith(".jar")]
 
 if len(burp_jar_files) == 0:
     print('Could not find burpsuite jar file in {burpdir}'.format(burpdir=burpdir))
