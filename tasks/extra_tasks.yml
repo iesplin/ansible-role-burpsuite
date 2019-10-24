@@ -1,0 +1,106 @@
+---
+# Tasks for extra jars and scripts for Burp Suite
+
+- name: Create directory for Burp Suite extras
+  file:
+    path: "{{ burpsuite_extras_dir }}"
+    state: directory
+    mode: 0755
+
+### Tasks to activate Burp Suite ###
+- name: Copy activate_burpsuite.py script to extras directory
+  copy:
+    src: activate_burpsuite.py
+    dest: "{{ burpsuite_extras_dir }}/activate_burpsuite.py"
+    mode: 0644
+
+# For community version, agree to terms and conditions. For pro version, activate license.
+- name: Activate Burp Suite
+  command: "python3 activate_burpsuite.py {{ burpsuite_dir }} {{ (burpsuite_product_type == 'pro') |
+      ternary('--license {{ burpsuite_pro_license_path }}', '') }}"
+  args:
+    chdir: "{{ burpsuite_extras_dir }}"
+  register: activate_burpsuite
+  changed_when: "'Terms and conditions accepted.' in activate_burpsuite.stdout or
+    'License successfully installed and activated.' in activate_burpsuite.stdout"
+  become: true
+  become_user: "{{ burpsuite_user }}"
+
+### Tasks to download the Burp Suite CA public certificate ###
+- name: Copy download_ca_cert.py script to extras directory
+  copy:
+    src: download_ca_cert.py
+    dest: "{{ burpsuite_extras_dir }}/download_ca_cert.py"
+    mode: 0644
+
+- name: Check for existing CA certificate
+  stat:
+    path: "{{ burpsuite_cacert_path }}"
+  register: burpsuite_cacert_path_result
+
+# If the certificate file doesn't exist
+- name: Create temporary file for CA public certificate
+  tempfile:
+    state: file
+    suffix: cacert
+  register: burpsuite_temp_cert
+  changed_when: false
+  become: true
+  become_user: "{{ burpsuite_user }}"
+
+- name: Download CA certificate
+  command: "python3 download_ca_cert.py {{ burpsuite_dir }} {{ burpsuite_temp_cert.path }}"
+  args:
+    chdir: "{{ burpsuite_extras_dir }}"
+  changed_when: false
+  become: true
+  become_user: "{{ burpsuite_user }}"
+
+- name: Copy CA certificate to {{ burpsuite_cacert_path }}
+  copy:
+    src: "{{ burpsuite_temp_cert.path }}"
+    dest: "{{ burpsuite_cacert_path }}"
+    remote_src: true
+    mode: 0644
+
+- name: Remove temporary certificate
+  file:
+    path: "{{ burpsuite_temp_cert.path }}"
+    state: absent
+  changed_when: false
+
+### Tasks to download the Jython and JRuby jar files ###
+- name: Download JRuby for Burp Suite
+  get_url:
+    url: "{{ burpsuite_jruby_jar_url }}"
+    dest: "{{ burpsuite_extras_dir }}/jruby-complete.jar"
+    checksum: "sha1:{{ burpsuite_jruby_jar_checksum }}"
+
+- name: Download Jython for Burp Suite
+  get_url:
+    url: "{{ burpsuite_jython_jar_url }}"
+    dest: "{{ burpsuite_extras_dir }}/jython-standalone.jar"
+    checksum: "sha1:{{ burpsuite_jython_jar_checksum }}"
+
+### Tasks for user config. This will only create the user config if the file doesn't exist ###
+- name: Ensure ~/.BurpSuite directory exists
+  file:
+    path: ~/.BurpSuite
+    state: directory
+    mode: 0700
+  become: true
+  become_user: "{{ burpsuite_user }}"
+
+- name: Check for existing user config
+  stat:
+    path: "~/.BurpSuite/UserConfig{{ burpsuite_product_type | capitalize }}.json"
+  register: burpsuite_user_config_result
+
+- name: Create example user config in extras directory
+  template:
+    src: UserConfig.json.j2
+    dest: "~/.BurpSuite/UserConfig{{ burpsuite_product_type | capitalize }}.json"
+    mode: 0600
+  become: true
+  become_user: "{{ burpsuite_user }}"
+  when: not burpsuite_user_config_result.stat.exists

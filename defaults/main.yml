@@ -35,7 +35,4 @@ burpsuite_jython_jar_checksum: "942c3294840dc9dfb3528d775f4d02a6d57c421f"
 burpsuite_pro_license_path: ""
 
 # Location to save the Burp Suite CA certificate
-burpsuite_cacert_path: "/etc/ssl/certs/PortSwigger_CA.der"
-
-# Create a user config for the user specified in burpsuite_user
-burpsuite_create_user_config: true
+burpsuite_cacert_path: "{{ burpsuite_extras_dir }}/PortSwigger_CA.der"

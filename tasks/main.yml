@@ -32,7 +32,7 @@
 - block:
     - name: Set facts for Burp Suite
       set_fact:
-        burpsuite_installer_script: "burpsuite_{{ burpsuite_product_type }}_linux_v{{ burpsuite_version | regex_replace('\\.', '_')}}.sh"
+        burpsuite_installer_script: "burpsuite_{{ burpsuite_product_type }}_linux_v{{ burpsuite_version | regex_replace('\\.', '_') }}.sh"
 
     - name: Check Burp Suite installer
       stat:
@@ -42,23 +42,21 @@
 
     # If installer isn't present
     - block:
+        # If community edition, then download it
+        - name: Download Burp Suite Community installer
+          get_url:
+            url: "{{ burpsuite_community_download_url }}"
+            dest: "{{ burpsuite_installer_dir }}/{{ burpsuite_installer_script }}"
+            checksum: "{{ burpsuite_installer_checksum }}"
+            mode: "0440"
+          when: burpsuite_product_type == 'community'
 
-      # If community edition, then download it
-      - name: Download Burp Suite Community installer
-        get_url:
-          url: "{{ burpsuite_community_download_url }}"
-          dest: "{{ burpsuite_installer_dir }}/{{ burpsuite_installer_script }}"
-          checksum: "{{ burpsuite_installer_checksum }}"
-          mode: "0440"
-        when: burpsuite_product_type == 'community'
-
-      # If professional edition, then halt with an error
-      - name: Burp Suite Pro installer is not present
-        fail:
-          msg: '{{ burpsuite_installer_dir }}/{{ burpsuite_installer_script }} does not exist. Cannot proceed with installation.'
-        when: burpsuite_product_type == 'pro'
-
-      when: installer_script.stat.exists == false
+        # If professional edition, then halt with an error
+        - name: Burp Suite Pro installer is not present
+          fail:
+            msg: '{{ burpsuite_installer_dir }}/{{ burpsuite_installer_script }} does not exist. Cannot proceed with installation.'
+          when: burpsuite_product_type == 'pro'
+      when: not installer_script.stat.exists
 
     # If installer script is present, assert that the checksum is correct
     - name: Assert that checksum is correct
@@ -79,12 +77,7 @@
       args:
         chdir: "{{ burpsuite_installer_dir }}"
 
-    - name: Remove Burp Suite installer
-      file:
-        path: "{{ burpsuite_installer_dir }}/{{ burpsuite_installer_script }}"
-        state: absent
-
-    - name: Remove response.varfile 
+    - name: Remove response.varfile
       file:
         path: "{{ burpsuite_installer_dir }}/burpsuite_response.varfile"
         state: absent
@@ -98,7 +91,7 @@
     use_regex: true
   register: burpsuite_desktop_files
 
-- name: Map windows to the Burp Suite launcher
+- name: Set WMClass for Burp Suite desktop files
   lineinfile:
     path: "{{ item.path }}"
     regex: "^StartupWMClass="
@@ -106,4 +99,4 @@
   loop: "{{ burpsuite_desktop_files.files }}"
 
 - name: Perform extra tasks for Burp Suite installation
-  include: extras.yml
+  include: extra_tasks.yml

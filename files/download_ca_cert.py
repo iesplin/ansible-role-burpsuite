@@ -25,8 +25,11 @@ if len(burp_jar_files) == 0:
     exit_status = 1    
 else:
     try:
-        child = pexpect.popen_spawn.PopenSpawn('{java} -Djava.awt.headless=true -jar "{jar}"'.format(java=java_path, jar=burp_jar_files[0]), encoding='UTF-8')
+        burp_jar_path = os.path.join(args.burpdir, burp_jar_files[0])
+        child = pexpect.popen_spawn.PopenSpawn('{java} -Djava.awt.headless=true -jar "{jar}"'.format(java=java_path, jar=burp_jar_path), encoding='UTF-8')
         child.logfile = sys.stdout
+
+
         child.expect('Proxy service started')
 
         with tempfile.TemporaryDirectory() as tmp_dir_name:

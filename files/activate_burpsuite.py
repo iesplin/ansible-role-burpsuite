@@ -11,8 +11,10 @@ parser.add_argument('burpdir', help='Burp Suite directory')
 parser.add_argument('--license', help='Path to Burp Suite Pro license file.')
 args = parser.parse_args()
 
+if args.license:
+    license_file = args.license
+
 java_path = os.path.join(args.burpdir, "jre/bin/java")
-license_file = args.license
 
 expect_options = [
     'Do you accept the terms and conditions\\? \\(y/n\\)',
@@ -30,7 +32,8 @@ if len(burp_jar_files) == 0:
     exit_status = 1    
 else:
     try:
-        child = pexpect.popen_spawn.PopenSpawn('{java} -Djava.awt.headless=true -jar "{jar}"'.format(java=java_path, jar=burp_jar_files[0]), encoding='UTF-8')
+        burp_jar_path = os.path.join(args.burpdir, burp_jar_files[0])
+        child = pexpect.popen_spawn.PopenSpawn('{java} -Djava.awt.headless=true -jar "{jar}"'.format(java=java_path, jar=burp_jar_path), encoding='UTF-8')
         child.logfile = sys.stdout
 
         while True:
