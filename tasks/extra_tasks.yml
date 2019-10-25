@@ -17,7 +17,7 @@
 # For community version, agree to terms and conditions. For pro version, activate license.
 - name: Activate Burp Suite
   command: "python3 activate_burpsuite.py {{ burpsuite_dir }} {{ (burpsuite_product_type == 'pro') |
-      ternary('--license {{ burpsuite_pro_license_path }}', '') }}"
+      ternary('--license ' + burpsuite_pro_license_path, '') }}"
   args:
     chdir: "{{ burpsuite_extras_dir }}"
   register: activate_burpsuite
