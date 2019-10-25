@@ -96,7 +96,7 @@
     path: "~/.BurpSuite/UserConfig{{ burpsuite_product_type | capitalize }}.json"
   register: burpsuite_user_config_result
 
-- name: Create example user config in extras directory
+- name: Create Burp Suite user config
   template:
     src: UserConfig.json.j2
     dest: "~/.BurpSuite/UserConfig{{ burpsuite_product_type | capitalize }}.json"
