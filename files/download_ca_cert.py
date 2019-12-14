@@ -1,14 +1,15 @@
 import argparse
-import filecmp
 import os
-import pexpect.popen_spawn
 import shutil
-import signal
+import subprocess
 import sys
 import tempfile
+import time
 import urllib.request
 
-exit_status = 0
+exit_status = 1
+retry = 5
+delay = 10
 
 parser = argparse.ArgumentParser(description='Download the Burp Suite CA Certificate.')
 parser.add_argument('burpdir', help='Burp Suite directory')
@@ -24,25 +25,21 @@ if len(burp_jar_files) == 0:
     print('Could not find burpsuite jar file in {burpdir}'.format(burpdir=burpdir))
     exit_status = 1    
 else:
-    try:
-        burp_jar_path = os.path.join(args.burpdir, burp_jar_files[0])
-        child = pexpect.popen_spawn.PopenSpawn('{java} -Djava.awt.headless=true -jar "{jar}"'.format(java=java_path, jar=burp_jar_path), encoding='UTF-8')
-        child.logfile = sys.stdout
-
-
-        child.expect('Proxy service started')
-
+    burp_jar_path = os.path.join(args.burpdir, burp_jar_files[0])
+    burp_args = [java_path, "-Djava.awt.headless=true", "-jar", burp_jar_path, "--use-defaults"]
+    with subprocess.Popen(burp_args) as proc:
         with tempfile.TemporaryDirectory() as tmp_dir_name:
-            tmp_cacert_file = os.path.join(tmp_dir_name, "ca.der")
-            urllib.request.urlretrieve("http://localhost:8080/cert", tmp_cacert_file)
-            shutil.move(tmp_cacert_file, cacert_file)
-            os.chmod(cacert_file, 0o644)
-            print("CA certificate saved.")
-
-    except Exception as e: 
-        print(e)
-        exit_status = 1
-    finally:
-        child.kill(signal.SIGTERM)
+            for attempt in range(retry):
+                try:
+                    tmp_cacert_file = os.path.join(tmp_dir_name, "ca.der")
+                    urllib.request.urlretrieve("http://localhost:8080/cert", tmp_cacert_file)
+                    shutil.move(tmp_cacert_file, cacert_file)
+                    os.chmod(cacert_file, 0o644)
+                    print("CA certificate saved.")
+                    exit_status = 0
+                    break
+                except Exception as e:
+                    time.sleep(delay)
+        proc.kill()
 
 sys.exit(exit_status)
