@@ -2,7 +2,7 @@
 # defaults file for ansible-role-burpsuite
 
 # Burp Suite version to install
-burpsuite_version: "2.1.04"
+burpsuite_version: "2.1.07"
 
 # Which Burp Suite product type. Valid values are 'community' or 'pro'
 burpsuite_product_type: community
@@ -17,7 +17,9 @@ burpsuite_installer_dir: /tmp
 burpsuite_community_download_url: "https://portswigger.net/burp/releases/download?product=community&type=linux&version={{ burpsuite_version }}"
 
 # Checksum for the burpsuite_installer script
-burpsuite_installer_sha256_checksum: "1a74519b7842bbcfb64e052112b8a6d312b8fe055d72abd9265c0c39e9f3407e"
+burpsuite_installer_sha256_checksum: 
+  community: "7efdb5f23da676969a2cbb02fb74f9428f4ffdc4a2764ad151bf52c76ff37dac"
+  pro: "34733e4b406fc581bc0dfbeebb985f4f3d1d3138271326ed4e43093a5d62e01f"
 
 # Directory for Burp Suite extras
 burpsuite_extras_dir: /opt/BurpSuiteExtras

@@ -5,11 +5,15 @@
   apt:
     name: "{{ burpsuite_packages }}"
     state: present
+  become: true
+  become_user: root
 
 - name: Remove Kali burpsuite package if installed
   apt:
     name: burpsuite
     state: absent
+  become: true
+  become_user: root
 
 - name: Check if previously installed
   stat:
@@ -47,7 +51,7 @@
           get_url:
             url: "{{ burpsuite_community_download_url }}"
             dest: "{{ burpsuite_installer_dir }}/{{ burpsuite_installer_script }}"
-            checksum: "sha256:{{ burpsuite_installer_sha256_checksum }}"
+            checksum: "sha256:{{ burpsuite_installer_sha256_checksum[ansible_product_type] }}"
             mode: "0440"
           when: burpsuite_product_type == 'community'
 
@@ -62,7 +66,7 @@
     - name: Assert that checksum is correct
       assert:
         that:
-          - burpsuite_installer_sha256_checksum == installer_script.stat.checksum
+          - burpsuite_installer_sha256_checksum[ansible_product_type] == installer_script.stat.checksum
         fail_msg: "Burp Suite installer checksum is invalid"
         success_msg: "Burp Suite installer checksum is valid"
       when: installer_script.stat.exists
@@ -85,7 +89,9 @@
 
 - name: Find Burp Suite desktop files
   find:
-    paths: /usr/share/applications
+    paths: 
+      - /usr/share/applications
+      - ~/.local/share/applications
     patterns: "Burp\\sSuite\\s(Community\\sEdition|Professional).*\\.desktop"
     file_type: file
     use_regex: true
@@ -97,6 +103,8 @@
     regex: "^StartupWMClass="
     line: "StartupWMClass=com-install4j-runtime-launcher-UnixLauncher"
   loop: "{{ burpsuite_desktop_files.files }}"
+  become: true
+  become_user: root
 
 - name: Perform extra tasks for Burp Suite installation
   include: extra_tasks.yml
