@@ -9,7 +9,7 @@ platforms:
   - name: kali-burpsuite
     image: kalilinux/kali-linux-docker
     volumes:
-      - ~/Downloads/burpsuite_community_linux_v2_1_04.sh:/tmp/burpsuite_community_linux_v2_1_04.sh:ro
+      - ~/Downloads/burpsuite_community_linux_v2_1_07.sh:/tmp/burpsuite_community_linux_v2_1_07.sh:ro
     groups:
       - community
 provisioner:

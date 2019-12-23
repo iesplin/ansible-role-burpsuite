@@ -8,7 +8,7 @@ burpsuite_version: "2.1.07"
 burpsuite_product_type: community
 
 # Directory to install Burp Suite
-burpsuite_dir: /opt/BurpSuiteCommunity
+burpsuite_dir: "/opt/BurpSuite{{ burpsuite_product_type | capitalize }}"
 
 # Directory where Burp Suite installer is located.
 burpsuite_installer_dir: /tmp
@@ -16,25 +16,30 @@ burpsuite_installer_dir: /tmp
 # Download URL for Burp Suite Community if Community installer is not found
 burpsuite_community_download_url: "https://portswigger.net/burp/releases/download?product=community&type=linux&version={{ burpsuite_version }}"
 
-# Checksum for the burpsuite_installer script
-burpsuite_installer_sha256_checksum: 
-  community: "7efdb5f23da676969a2cbb02fb74f9428f4ffdc4a2764ad151bf52c76ff37dac"
-  pro: "34733e4b406fc581bc0dfbeebb985f4f3d1d3138271326ed4e43093a5d62e01f"
-
-# Directory for Burp Suite extras
-burpsuite_extras_dir: /opt/BurpSuiteExtras
-
 # User for activation of Burp Suite, download CA cert, user config
 burpsuite_user: root
 
+# Checksum for the burpsuite_installer script
+# If not configured, it will be automatically set based on product type and version from _burpsuite_installer_sha256_checksums in vars/main.yml
+# burpsuite_installer_sha256_checksum: ""
+
+# Perform extra tasks for Burp Suite including:
+# - automated license installation/acceptance of terms and conditions
+# - download CA certificate
+# - download JRuby and Jython standalone jars
+# - deploy user config file
+burpsuite_extras_enabled: true
+# Directory for Burp Suite extras
+burpsuite_extras_dir: /opt/BurpSuiteExtras
+
 # URLs and checksums for Jruby and Jython jar files
-burpsuite_jruby_jar_url: "https://repo1.maven.org/maven2/org/jruby/jruby-complete/9.2.5.0/jruby-complete-9.2.5.0.jar"
-burpsuite_jruby_jar_checksum: "c43308e2357eb906acc54405656f5abd820dd4af"
-burpsuite_jython_jar_url: "https://repo1.maven.org/maven2/org/python/jython-standalone/2.7.1/jython-standalone-2.7.1.jar"
-burpsuite_jython_jar_checksum: "942c3294840dc9dfb3528d775f4d02a6d57c421f"
+burpsuite_extras_jruby_jar_url: "https://repo1.maven.org/maven2/org/jruby/jruby-complete/9.2.5.0/jruby-complete-9.2.5.0.jar"
+burpsuite_extras_jruby_jar_checksum: "c43308e2357eb906acc54405656f5abd820dd4af"
+burpsuite_extras_jython_jar_url: "https://repo1.maven.org/maven2/org/python/jython-standalone/2.7.1/jython-standalone-2.7.1.jar"
+burpsuite_extras_jython_jar_checksum: "942c3294840dc9dfb3528d775f4d02a6d57c421f"
 
 # Path to the Burp Suite Pro license file
-burpsuite_pro_license_path: ""
+burpsuite_extras_pro_license_path: ""
 
 # Location to save the Burp Suite CA certificate
-burpsuite_cacert_path: "{{ burpsuite_extras_dir }}/PortSwigger_CA.der"
+burpsuite_extras_cacert_path: "{{ burpsuite_extras_dir }}/PortSwigger_CA.der"
