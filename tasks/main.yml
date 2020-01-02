@@ -92,25 +92,6 @@
         state: absent
   when: installed_version is not defined or installed_version != burpsuite_version
 
-- name: Find Burp Suite desktop files
-  find:
-    paths: 
-      - /usr/share/applications
-      - ~/.local/share/applications
-    patterns: "Burp\\sSuite\\s(Community\\sEdition|Professional).*\\.desktop"
-    file_type: file
-    use_regex: true
-  register: burpsuite_desktop_files
-
-- name: Set WMClass for Burp Suite desktop files
-  lineinfile:
-    path: "{{ item.path }}"
-    regex: "^StartupWMClass="
-    line: "StartupWMClass=com-install4j-runtime-launcher-UnixLauncher"
-  loop: "{{ burpsuite_desktop_files.files }}"
-  become: true
-  become_user: root
-
 - name: Perform extra tasks for Burp Suite installation
   include: extra_tasks.yml
   when: burpsuite_extras_enabled
