@@ -32,44 +32,41 @@
     path: "{{ burpsuite_extras_cacert_path }}"
   register: burpsuite_extras_cacert_path_result
 
-# If the certificate file doesn't exist
-- block:
-    - name: Copy download_ca_cert.py script to extras directory
-      copy:
-        src: download_ca_cert.py
-        dest: "{{ burpsuite_extras_dir }}/download_ca_cert.py"
-        mode: 0644
+- name: Copy download_ca_cert.py script to extras directory
+  copy:
+    src: download_ca_cert.py
+    dest: "{{ burpsuite_extras_dir }}/download_ca_cert.py"
+    mode: 0644
 
-    - name: Create temporary file for CA public certificate
-      tempfile:
-        state: file
-        suffix: cacert
-      register: burpsuite_temp_cert
-      changed_when: false
-      become: true
-      become_user: "{{ burpsuite_user }}"
+- name: Create temporary file for CA public certificate
+  tempfile:
+    state: file
+    suffix: cacert
+  register: burpsuite_temp_cert
+  changed_when: false
+  become: true
+  become_user: "{{ burpsuite_user }}"
 
-    - name: Download CA certificate
-      command: "python3 download_ca_cert.py {{ burpsuite_dir }} {{ burpsuite_temp_cert.path }}"
-      args:
-        chdir: "{{ burpsuite_extras_dir }}"
-      changed_when: false
-      become: true
-      become_user: "{{ burpsuite_user }}"
+- name: Download CA certificate
+  command: "python3 download_ca_cert.py {{ burpsuite_dir }} {{ burpsuite_temp_cert.path }}"
+  args:
+    chdir: "{{ burpsuite_extras_dir }}"
+  changed_when: false
+  become: true
+  become_user: "{{ burpsuite_user }}"
 
-    - name: Copy CA certificate to {{ burpsuite_extras_cacert_path }}
-      copy:
-        src: "{{ burpsuite_temp_cert.path }}"
-        dest: "{{ burpsuite_extras_cacert_path }}"
-        remote_src: true
-        mode: 0644
+- name: Copy CA certificate to {{ burpsuite_extras_cacert_path }}
+  copy:
+    src: "{{ burpsuite_temp_cert.path }}"
+    dest: "{{ burpsuite_extras_cacert_path }}"
+    remote_src: true
+    mode: 0644
 
-    - name: Remove temporary certificate
-      file:
-        path: "{{ burpsuite_temp_cert.path }}"
-        state: absent
-      changed_when: false
-  when: not burpsuite_extras_cacert_path_result.stat.exists
+- name: Remove temporary certificate
+  file:
+    path: "{{ burpsuite_temp_cert.path }}"
+    state: absent
+  changed_when: false
 
 ### Tasks to download the Jython and JRuby jar files ###
 - name: Download JRuby for Burp Suite
