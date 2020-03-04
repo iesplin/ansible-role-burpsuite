@@ -7,9 +7,9 @@ lint:
   name: yamllint
 platforms:
   - name: kali-burpsuite
-    image: kalilinux/kali-linux-docker
+    image: kalilinux/kali-rolling
     volumes:
-      - ~/Downloads/burpsuite_community_linux_v2_1_07.sh:/tmp/burpsuite_community_linux_v2_1_07.sh:ro
+      - ~/Downloads/burpsuite_community_linux_v2020_2.sh:/tmp/burpsuite_community_linux_v2020_2.sh:ro
     groups:
       - community
 provisioner:
