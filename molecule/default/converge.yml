@@ -1,0 +1,13 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Create user
+      user:
+        name: "{{ burpsuite_user }}"
+        shell: /bin/bash
+        create_home: true
+
+    - name: "Include ansible-role-burpsuite"
+      include_role:
+        name: "ansible-role-burpsuite"
