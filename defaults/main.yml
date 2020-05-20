@@ -32,11 +32,11 @@ burpsuite_extras_enabled: true
 # Directory for Burp Suite extras
 burpsuite_extras_dir: /opt/BurpSuiteExtras
 
-# URLs and checksums for Jruby and Jython jar files
-burpsuite_extras_jruby_jar_url: "https://repo1.maven.org/maven2/org/jruby/jruby-complete/9.2.5.0/jruby-complete-9.2.5.0.jar"
-burpsuite_extras_jruby_jar_checksum: "c43308e2357eb906acc54405656f5abd820dd4af"
-burpsuite_extras_jython_jar_url: "https://repo1.maven.org/maven2/org/python/jython-standalone/2.7.1/jython-standalone-2.7.1.jar"
-burpsuite_extras_jython_jar_checksum: "942c3294840dc9dfb3528d775f4d02a6d57c421f"
+# URLs and checksums for JRuby and Jython jar files
+burpsuite_extras_jruby_jar_url: "https://repo1.maven.org/maven2/org/jruby/jruby-complete/9.2.11.1/jruby-complete-9.2.11.1.jar"
+burpsuite_extras_jruby_jar_checksum: "78aa284f9b011173dc2b72bc1c8593a3606aacf3"
+burpsuite_extras_jython_jar_url: "https://repo1.maven.org/maven2/org/python/jython-standalone/2.7.2/jython-standalone-2.7.2.jar"
+burpsuite_extras_jython_jar_checksum: "15592c29538abd36d15570eda9fa055ed1a618ba"
 
 # Path to the Burp Suite Pro license file
 burpsuite_extras_pro_license_path: ""
