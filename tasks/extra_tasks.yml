@@ -73,13 +73,13 @@
   get_url:
     url: "{{ burpsuite_extras_jruby_jar_url }}"
     dest: "{{ burpsuite_extras_dir }}/jruby-complete.jar"
-    checksum: "sha1:{{ burpsuite_extras_jruby_jar_checksum }}"
+    checksum: "{{ burpsuite_extras_jruby_jar_checksum }}"
 
 - name: Download Jython for Burp Suite
   get_url:
     url: "{{ burpsuite_extras_jython_jar_url }}"
     dest: "{{ burpsuite_extras_dir }}/jython-standalone.jar"
-    checksum: "sha1:{{ burpsuite_extras_jython_jar_checksum }}"
+    checksum: "{{ burpsuite_extras_jython_jar_checksum }}"
 
 ### Tasks for user config. This will only create the user config if the file doesn't exist ###
 - name: Ensure ~/.BurpSuite directory exists
