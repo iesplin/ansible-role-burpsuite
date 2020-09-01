@@ -2,7 +2,7 @@
 # defaults file for ansible-role-burpsuite
 
 # Burp Suite version to install
-burpsuite_version: "2020.6"
+burpsuite_version: "2020.8.1"
 
 # Which Burp Suite product type. Valid values are 'community' or 'pro'
 burpsuite_product_type: community
@@ -33,8 +33,8 @@ burpsuite_extras_enabled: true
 burpsuite_extras_dir: /opt/BurpSuiteExtras
 
 # URLs and checksums for JRuby and Jython jar files
-burpsuite_extras_jruby_jar_url: "https://repo1.maven.org/maven2/org/jruby/jruby-complete/9.2.12.0/jruby-complete-9.2.12.0.jar"
-burpsuite_extras_jruby_jar_checksum: "sha256:3a92f641c16ec3636079ef6d5f7996166571ec9171947c56bb294cfa1b4dbcc7"
+burpsuite_extras_jruby_jar_url: "https://repo1.maven.org/maven2/org/jruby/jruby-complete/9.2.13.0/jruby-complete-9.2.13.0.jar"
+burpsuite_extras_jruby_jar_checksum: "sha256:5b55a0f90019c19ce5dc874f7e17b42e949d3fe2a87fa2f7c19d30f52c9968cf"
 burpsuite_extras_jython_jar_url: "https://repo1.maven.org/maven2/org/python/jython-standalone/2.7.2/jython-standalone-2.7.2.jar"
 burpsuite_extras_jython_jar_checksum: "sha1:15592c29538abd36d15570eda9fa055ed1a618ba"
 
