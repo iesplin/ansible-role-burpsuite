@@ -40,7 +40,6 @@ else:
         'please paste your license key below.',
         'Enter preferred activation method',
         'Your license is successfully installed and activated.',
-        'Proxy service started'
         ]
 
     burp_jar_files = [ f for f in os.listdir(args.burpdir) if f.startswith("burpsuite_") and f.endswith(".jar")]
@@ -65,14 +64,12 @@ else:
                 elif i == 2:
                     with open(license_file, 'r') as f:
                         license = f.read()
-                    child.sendline(license)
+                        # Remove any extra spaces or new lines
+                        license = license.rstrip()
+                        child.sendline(license)
                 elif i == 3:
                     child.sendline('o')
                 elif i == 4:
-                    print('License successfully installed and activated.')
-                    break
-                elif i == 5:
-                    print('License previously activated.')
                     break
                 else:
                     print('Unexpected expect!')
