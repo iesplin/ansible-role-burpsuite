@@ -6,14 +6,6 @@
     name: "{{ burpsuite_packages }}"
     state: present
   become: true
-  become_user: root
-
-- name: Remove Kali burpsuite package if installed
-  apt:
-    name: burpsuite
-    state: absent
-  become: true
-  become_user: root
 
 - name: Check if previously installed
   stat:
