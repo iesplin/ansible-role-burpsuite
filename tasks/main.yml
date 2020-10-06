@@ -12,34 +12,42 @@
     path: "{{ burpsuite_dir }}/.install4j/i4jparams.conf"
   register: install4j_config_file
 
-- name: Read install4j config file
-  slurp:
-    src: "{{ burpsuite_dir }}/.install4j/i4jparams.conf"
-  register: install4j_config_contents
+- block:
+    - name: Read install4j config file
+      slurp:
+        src: "{{ burpsuite_dir }}/.install4j/i4jparams.conf"
+      register: install4j_config_contents
+
+    - name: Get current version
+      set_fact:
+        installed_version: "{{ install4j_config_contents.content | b64decode |
+            regex_search('applicationVersion=\"[0-9.]+\"', multiline=True) |
+            regex_replace('applicationVersion=\"([0-9.]+)\"', '\\1') }}"
   when: install4j_config_file.stat.exists
 
-- name: Get current version
+- name: Retrieve release data from portswigger.net
   set_fact:
-    installed_version: "{{ install4j_config_contents.content | b64decode |
-        regex_search('applicationVersion=\"[0-9.]+\"', multiline=True) |
-        regex_replace('applicationVersion=\"([0-9.]+)\"', '\\1') }}"
-  when: install4j_config_file.stat.exists
+    burp_release_data: "{{ lookup('url', 'https://portswigger.net/burp/releases/data?lastId=-1&pageSize=50') }}"
+
+- name: Query version number for Burp Suite {{ burpsuite_product_type }} latest release
+  set_fact:
+    burpsuite_version: "{{ burp_release_data | json_query(\"ResultSet.Results[0].builds[?ProductId == '\" + burpsuite_product_type + \"' && ProductPlatform=='Linux'].Version | [0]\") }}"
+  when: burpsuite_version == "latest"
+
+- name: Query checksum for Burp Suite {{ burpsuite_product_type }} {{ burpsuite_version }}
+  set_fact:
+    burpsuite_installer_sha256_checksum: "{{ burp_release_data | json_query(\"ResultSet.Results[0].builds[?Version == '\" + burpsuite_version + \"' && ProductId == '\" + burpsuite_product_type + \"' && ProductPlatform=='Linux'][].Sha256Checksum | [0]\") }}"
 
 - block:
-    - name: Set facts for Burp Suite
+    - name: Set installer script filename
       set_fact:
         burpsuite_installer_script: "burpsuite_{{ burpsuite_product_type }}_linux_v{{ burpsuite_version | regex_replace('\\.', '_') }}.sh"
 
-    - name: Check Burp Suite installer
+    - name: Check Burp Suite installer file exists
       stat:
         path: "{{ burpsuite_installer_dir }}/{{ burpsuite_installer_script }}"
         checksum_algorithm: sha256
       register: installer_script
-
-    - name: Set Burp Suite installer SHA256 checksum fact
-      set_fact:
-        burpsuite_installer_sha256_checksum: "{{ _burpsuite_installer_sha256_checksums[burpsuite_product_type][burpsuite_version] }}"
-      when: (burpsuite_installer_sha256_checksum is undefined) or (burpsuite_installer_sha256_checksum is none) or (burpsuite_installer_sha256_checksum | trim == "")
 
     # If installer isn't present
     - block:

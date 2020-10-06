@@ -2,7 +2,8 @@
 # defaults file for ansible-role-burpsuite
 
 # Burp Suite version to install
-burpsuite_version: "2020.9.1"
+# Set to "latest" to install the newest release, otherwise specify the exact version e.g. "2020.9.2"
+burpsuite_version: "latest"
 
 # Which Burp Suite product type. Valid values are 'community' or 'pro'
 burpsuite_product_type: community
@@ -18,10 +19,6 @@ burpsuite_community_download_url: "https://portswigger.net/burp/releases/downloa
 
 # User for activation of Burp Suite, download CA cert, user config
 burpsuite_user: root
-
-# Checksum for the burpsuite_installer script
-# If not configured, it will be automatically set based on product type and version from _burpsuite_installer_sha256_checksums in vars/main.yml
-# burpsuite_installer_sha256_checksum: ""
 
 # Perform extra tasks for Burp Suite including:
 # - automated license installation/acceptance of terms and conditions

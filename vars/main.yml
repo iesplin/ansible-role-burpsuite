@@ -7,9 +7,3 @@ burpsuite_packages:
   - python3
   - python3-defusedxml
   - python3-pexpect
-
-_burpsuite_installer_sha256_checksums:
-  community:
-    "2020.9.1": 0a1be83d0023b976f37fa0331a28278627eb90b6ea24a34fca3f7360e1430e9f
-  pro:
-    "2020.9.1": fc3ec7801509435ba88fefa0a0d0ae76286bfb4330b063ecbf7423e630174d99
