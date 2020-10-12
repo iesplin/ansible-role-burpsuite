@@ -6,4 +6,5 @@ burpsuite_packages:
   - libfontconfig1
   - python3
   - python3-defusedxml
+  - python3-jmespath
   - python3-pexpect
