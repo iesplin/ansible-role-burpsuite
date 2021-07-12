@@ -1,9 +1,10 @@
 ---
 galaxy_info:
-  author: Ian Esplin
-  description: Burp Suite
+  role_name: burp_suite
+  author: iesplin
+  description: Burp Suite installation for Kali
   license: MIT
-  min_ansible_version: 2.7
+  min_ansible_version: 2.10
   platforms:
     - name: Kali
       versions:

@@ -3,11 +3,11 @@
   hosts: all
   tasks:
     - name: Create user
-      user:
-        name: "{{ burpsuite_user }}"
+      ansible.builtin.user:
+        name: "hacker"
         shell: /bin/bash
         create_home: true
 
     - name: "Include ansible-role-burpsuite"
-      include_role:
+      ansible.builtin.include_role:
         name: "ansible-role-burpsuite"

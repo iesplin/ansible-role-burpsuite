@@ -8,3 +8,7 @@ burpsuite_packages:
   - python3-defusedxml
   - python3-jmespath
   - python3-pexpect
+
+_burpsuite_release_channel_enum:
+  stable: "Stable"
+  early_adopter: "Early Adopter"

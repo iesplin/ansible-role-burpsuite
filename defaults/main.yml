@@ -2,23 +2,23 @@
 # defaults file for ansible-role-burpsuite
 
 # Burp Suite version to install
-# Set to "latest" to install the newest release, otherwise specify the exact version e.g. "2020.9.2"
-burpsuite_version: "latest"
-
 # Which Burp Suite product type. Valid values are 'community' or 'pro'
 burpsuite_product_type: community
 
-# Directory to install Burp Suite
-burpsuite_dir: "/opt/BurpSuite{{ burpsuite_product_type | capitalize }}"
+# Set to "latest" to install the newest release, otherwise specify the exact version e.g. "2020.9.2"
+burpsuite_version: "latest"
 
-# Directory where Burp Suite installer is located.
-burpsuite_installer_dir: /tmp
-
-# Download URL for Burp Suite Community if Community installer is not found
-burpsuite_community_download_url: "https://portswigger.net/burp/releases/download?product=community&type=linux&version={{ burpsuite_version }}"
+# Which release channel to use: 'stable' or 'early_adopter'
+burpsuite_release_channel: 'stable'
 
 # User for activation of Burp Suite, download CA cert, user config
-burpsuite_user: root
+burpsuite_user: hacker
+
+# Burp Suite will automatically install under the user's home directory, but can be overridden
+# burpsuite_dir: "/home/{{ burpsuite_user }}/BurpSuite{{ burpsuite_product_type | capitalize }}"
+
+# Download URL for Burp Suite installer
+burpsuite_download_url: "https://portswigger.net/burp/releases/download?product={{ burpsuite_product_type }}&type=linux&version={{ burpsuite_version }}"
 
 # Perform extra tasks for Burp Suite including:
 # - automated license installation/acceptance of terms and conditions
@@ -26,12 +26,13 @@ burpsuite_user: root
 # - download JRuby and Jython standalone jars
 # - deploy user config file
 burpsuite_extras_enabled: true
-# Directory for Burp Suite extras
-burpsuite_extras_dir: /opt/BurpSuiteExtras
+
+# The BurpSuiteExtras directory will automatically be created under the user's home directory, but can be overridden
+# burpsuite_extras_dir: "/home/{{ burpsuite_user }}/BurpSuiteExtras"
 
 # URLs and checksums for JRuby and Jython jar files
-burpsuite_extras_jruby_jar_url: "https://repo1.maven.org/maven2/org/jruby/jruby-complete/9.2.13.0/jruby-complete-9.2.13.0.jar"
-burpsuite_extras_jruby_jar_checksum: "sha256:5b55a0f90019c19ce5dc874f7e17b42e949d3fe2a87fa2f7c19d30f52c9968cf"
+burpsuite_extras_jruby_jar_url: "https://repo1.maven.org/maven2/org/jruby/jruby-complete/9.2.19.0/jruby-complete-9.2.19.0.jar"
+burpsuite_extras_jruby_jar_checksum: "sha256:4fa042e22593d05e5779d232e47e943342a9e7538c7291855a6861091cca09b3"
 burpsuite_extras_jython_jar_url: "https://repo1.maven.org/maven2/org/python/jython-standalone/2.7.2/jython-standalone-2.7.2.jar"
 burpsuite_extras_jython_jar_checksum: "sha1:15592c29538abd36d15570eda9fa055ed1a618ba"
 

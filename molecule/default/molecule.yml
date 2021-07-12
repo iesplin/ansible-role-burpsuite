@@ -4,16 +4,22 @@ dependency:
 driver:
   name: docker
 platforms:
-  - name: kali-burpsuite
-    image: kalilinux/kali-rolling
+  - name: kali-burpsuite-community-early
+    image: kalilinux/kali:latest
     groups:
-      - community
+      - community_early
+  - name: kali-burpsuite-community-stable
+    image: kalilinux/kali:latest
+    groups:
+      - community_stable
 provisioner:
   name: ansible
   inventory:
     group_vars:
-      community:
-        burpsuite_user: hacker
+      community_early:
+        burpsuite_release_channel: early_adopter
+      community_stable:
+        burpsuite_release_channel: stable
 verifier:
   name: ansible
   options:
