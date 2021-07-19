@@ -126,7 +126,7 @@
 
 - name: Activate Burp Suite and download CA public certificate
   ansible.builtin.command:
-    cmd: "python3 autoburp.py --cacert-path '{{ burpsuite_cacert_path }}' --license-key '${BURP_LICENSE_KEY}' {{ burpsuite_dir }}"
+    cmd: "python3 autoburp.py --cacert-path '{{ burpsuite_cacert_path }}' {{ burpsuite_dir }}"
     chdir: "{{ burpsuite_extras_dir }}"
   environment:
     BURP_LICENSE_KEY: "{{ burpsuite_license_key }}"

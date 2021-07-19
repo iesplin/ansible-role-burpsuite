@@ -100,10 +100,18 @@ if __name__=="__main__":
     parser.add_argument("--cacert-path", help="Download path for the Burp Suite CA public certificate.")
     args = parser.parse_args()
 
+    license_key = None
+    cacert_path = None
+
     exit_status = 0
     burp_dir = args.burpdir
     cacert_path = args.cacert_path
-    license_key = args.license_key
+    
+    # Check BURP_LICENSE_KEY env var first
+    if os.getenv('BURP_LICENSE_KEY'):
+        license_key = os.getenv('BURP_LICENSE_KEY')
+    elif args.license_key:
+        license_key = args.license_key
 
     # Check Burp Suite directory exists
     if not os.path.isdir(burp_dir):
