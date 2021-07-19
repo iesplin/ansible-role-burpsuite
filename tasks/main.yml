@@ -11,12 +11,12 @@
   when: burpsuite_version == "latest"
 
 - name: Get user details
-  user:
+  ansible.builtin.user:
     name: "{{ burpsuite_user }}"
   register: burpsuite_user_details
 
 - name: Set installation directory if not defined
-  set_fact:
+  ansible.builtin.set_fact:
     burpsuite_dir: "{{ burpsuite_user_details.home }}/BurpSuite{{ burpsuite_product_type | capitalize }}"
   when: burpsuite_dir is undefined
 
@@ -44,7 +44,7 @@
           regex_replace('applicationVersion=\"([0-9.]+)\"', '\\1') }}"
 
   - name: Current version
-    debug:
+    ansible.builtin.debug:
       msg: "Burp Suite {{ installed_version }} currently installed"
   when: install4j_config_file.stat.exists
 
@@ -62,7 +62,7 @@
 
 - block:
     - name: Burp Suite version
-      debug:
+      ansible.builtin.debug:
         msg: "Installing Burp Suite {{ burpsuite_version }} ({{ _burpsuite_release_channel_enum[burpsuite_release_channel] }})"
 
     - name: Set installer script filename
@@ -94,7 +94,7 @@
       become_user: "{{ burpsuite_user }}"
 
     - name: Clean-up files
-      file:
+      ansible.builtin.file:
         path: "{{ item }}"
         state: absent
       loop:
@@ -102,6 +102,72 @@
         - "/tmp/burpsuite_response.varfile"
   when: installed_version is not defined or installed_version != burpsuite_version
 
-- name: Perform extra tasks for Burp Suite installation
-  ansible.builtin.include_tasks: extra_tasks.yml
-  when: burpsuite_extras_enabled
+- name: Set Burp Suite extras directory if not defined
+  ansible.builtin.set_fact:
+    burpsuite_extras_dir: "{{ burpsuite_user_details.home }}/BurpSuiteExtras"
+  when: burpsuite_extras_dir is undefined
+
+- name: Create directory for Burp Suite extras
+  ansible.builtin.file:
+    path: "{{ burpsuite_extras_dir }}"
+    state: directory
+    owner: "{{ burpsuite_user }}"
+    group: "{{ burpsuite_user_details.group }}"
+    mode: "0755"
+
+### Tasks to activate Burp Suite ###
+- name: Copy autoburp.py script to extras directory
+  ansible.builtin.copy:
+    src: autoburp.py
+    dest: "{{ burpsuite_extras_dir }}/autoburp.py"
+    owner: "{{ burpsuite_user }}"
+    group: "{{ burpsuite_user_details.group }}"
+    mode: "0644"
+
+- name: Activate Burp Suite and download CA public certificate
+  ansible.builtin.command:
+    cmd: "python3 autoburp.py --cacert-path '{{ burpsuite_cacert_path }}' --license-key '${BURP_LICENSE_KEY}' {{ burpsuite_dir }}"
+    chdir: "{{ burpsuite_extras_dir }}"
+  environment:
+    BURP_LICENSE_KEY: "{{ burpsuite_license_key }}"
+  async: 600
+  register: autoburp
+  changed_when: "'Terms and conditions accepted.' in autoburp.stdout or
+    'License successfully installed and activated.' in autoburp.stdout or
+    'Certificate downloaded/updated' in autoburp.stdout"
+  become: true
+  become_user: "{{ burpsuite_user }}"
+
+### Tasks to download the Jython and JRuby jar files ###
+- name: Download JRuby for Burp Suite
+  ansible.builtin.get_url:
+    url: "{{ burpsuite_jruby_jar_url }}"
+    dest: "{{ burpsuite_extras_dir }}/jruby-complete.jar"
+    checksum: "{{ burpsuite_jruby_jar_checksum }}"
+    owner: "{{ burpsuite_user }}"
+    group: "{{ burpsuite_user_details.group }}"
+    mode: "0640"
+
+- name: Download Jython for Burp Suite
+  ansible.builtin.get_url:
+    url: "{{ burpsuite_jython_jar_url }}"
+    dest: "{{ burpsuite_extras_dir }}/jython-standalone.jar"
+    checksum: "{{ burpsuite_jython_jar_checksum }}"
+    owner: "{{ burpsuite_user }}"
+    group: "{{ burpsuite_user_details.group }}"
+    mode: "0640"
+
+### Tasks for user config. This will only create the user config if the file doesn't exist ###
+- name: Check for existing user config
+  ansible.builtin.stat:
+    path: "{{ burpsuite_user_details.home }}/.BurpSuite/UserConfig{{ burpsuite_product_type | capitalize }}.json"
+  register: burpsuite_user_config_result
+
+- name: Create Burp Suite user config
+  ansible.builtin.template:
+    src: UserConfig.json.j2
+    dest: "{{ burpsuite_user_details.home }}/.BurpSuite/UserConfig{{ burpsuite_product_type | capitalize }}.json"
+    owner: "{{ burpsuite_user }}"
+    group: "{{ burpsuite_user_details.group }}"
+    mode: "0600"
+  when: not burpsuite_user_config_result.stat.exists
