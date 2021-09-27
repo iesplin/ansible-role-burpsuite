@@ -140,7 +140,7 @@ if __name__=="__main__":
                 product_type = "community"
 
             # Start Burp Suite in headless mode
-            burp_command = f"{java_path} -Djava.awt.headless=true -jar '{burp_jar_path}'"
+            burp_command = f"{java_path} --illegal-access=permit -Djava.awt.headless=true -jar '{burp_jar_path}'"
             child = pexpect.popen_spawn.PopenSpawn(burp_command, encoding='UTF-8')
             child.logfile = sys.stdout
 
