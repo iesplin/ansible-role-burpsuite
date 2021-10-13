@@ -54,11 +54,15 @@
 
 - name: Get version number
   ansible.builtin.set_fact:
-    burpsuite_version: "{{ burp_release_data | json_query(\"ResultSet.Results[?releaseChannels[0]=='\" + _burpsuite_release_channel_enum[burpsuite_release_channel] + \"' && builds[?ProductId == '\" + burpsuite_product_type + \"' && ProductPlatform=='Linux']].version | sort(@)[-1:] | [0]\") }}"
+    burpsuite_version: "{{ burp_release_data | to_json | from_json | json_query(version_query) }}"
+  vars:
+    version_query: "ResultSet.Results[?releaseChannels[0]=='{{ _burpsuite_release_channel_enum[burpsuite_release_channel] }}' && builds[?ProductId == '{{ burpsuite_product_type }}' && ProductPlatform=='Linux']].version | sort(@)[-1]"
 
 - name: Get checksum
   ansible.builtin.set_fact:
-    burpsuite_installer_sha256_checksum: "{{ burp_release_data | json_query(\"ResultSet.Results[].builds[?Version == '\" + burpsuite_version + \"' && ProductId == '\" + burpsuite_product_type + \"' && ProductPlatform=='Linux'][].Sha256Checksum | [0]\") }}"
+    burpsuite_installer_sha256_checksum: "{{ burp_release_data | to_json | from_json | json_query(checksum_query) }}"
+  vars:
+    checksum_query: "ResultSet.Results[].builds[?Version == '{{ burpsuite_version }}' && ProductId == '{{ burpsuite_product_type }}' && ProductPlatform=='Linux'][].Sha256Checksum | [0]"
 
 - block:
     - name: Burp Suite version
