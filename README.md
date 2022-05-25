@@ -1,5 +1,7 @@
 # Ansible role: Burp Suite
 
+[![CI](https://github.com/iesplin/ansible-role-burpsuite/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/iesplin/ansible-role-burpsuite/actions/workflows/ci.yml)
+
 Ansible role to install Burp Suite for Linux.
 
 In addition, this role will also:
@@ -44,3 +46,7 @@ This role requires the `jmespath` Python library to be present on the host runni
 ## License
 
 MIT
+
+## Thanks
+
+[Jeff Geerling](https://github.com/geerlingguy) for his excellent work and Ansible roles that served as a guide for this role.
