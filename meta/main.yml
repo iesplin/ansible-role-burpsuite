@@ -6,12 +6,12 @@ galaxy_info:
   license: MIT
   min_ansible_version: 2.10
   platforms:
-    - name: Kali
+    - name: Debian
       versions:
-        - rolling
+        - bullseye
     - name: Ubuntu
       versions:
-        - 22.04
+        - jammy
     - name: Fedora
       versions:
         - 36
