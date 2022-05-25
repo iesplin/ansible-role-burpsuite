@@ -39,12 +39,12 @@ jobs:
         include:
           - distro: docker.io/kalilinux/kali-rolling:latest
             playbook: converge.yml
-          # - distro: docker.io/kalilinux/kali-rolling:latest
-          #   playbook: converge-install-version.yml
-          # - distro: docker.io/library/ubuntu:22.04
-          #   playbook: converge.yml
-          # - distro: docker.io/library/fedora:36
-          #   playbook: converge.yml
+          - distro: docker.io/kalilinux/kali-rolling:latest
+            playbook: converge-install-version.yml
+          - distro: docker.io/library/ubuntu:22.04
+            playbook: converge.yml
+          - distro: docker.io/library/fedora:36
+            playbook: converge.yml
     steps:
       - name: Check out the codebase.
         uses: actions/checkout@v2
