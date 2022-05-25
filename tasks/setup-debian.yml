@@ -1,0 +1,10 @@
+---
+- name: Install package dependencies
+  ansible.builtin.apt:
+    name:
+      - libfontconfig1
+      - libfreetype6
+      - python3-defusedxml
+      - python3-pexpect
+    state: present
+  become: true

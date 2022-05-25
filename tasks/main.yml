@@ -1,135 +1,41 @@
 ---
 # tasks file for ansible-role-burpsuite
 
-- name: Check that burpsuite_release_channel value is valid
-  ansible.builtin.assert:
-    that:
-      - burpsuite_release_channel in _burpsuite_release_channel_enum
-    fail_msg: "burpsuite_release_channel must be either 'stable' or 'early_adopter'"
-    quiet: true
-  changed_when: false
+- ansible.builtin.import_tasks: validations.yml
+
+- ansible.builtin.import_tasks: variables.yml
+
+- name: Lookup latest version data
+  ansible.builtin.include_tasks: lookup-latest-version.yml
   when: burpsuite_version == "latest"
 
-- name: Get user details
-  ansible.builtin.user:
-    name: "{{ burpsuite_user }}"
-  register: burpsuite_user_details
+# OS dependencies
+- ansible.builtin.include_tasks: setup-debian.yml
+  when: ansible_os_family == 'Debian'
 
-- name: Set installation directory if not defined
-  ansible.builtin.set_fact:
-    burpsuite_dir: "{{ burpsuite_user_details.home }}/BurpSuite{{ burpsuite_product_type | capitalize }}"
-  when: burpsuite_dir is undefined
+- ansible.builtin.include_tasks: setup-redhat.yml
+  when: ansible_os_family == 'RedHat'
 
-- name: Install required packages
-  ansible.builtin.apt:
-    name: "{{ burpsuite_packages }}"
-    state: present
-  become: true
+# Check previous installation
+- name: Check for previous Burp Suite installation
+  ansible.builtin.import_tasks: check-previous-install.yml
 
-- name: Check if previously installed
-  ansible.builtin.stat:
-    path: "{{ burpsuite_dir }}/.install4j/i4jparams.conf"
-  register: install4j_config_file
+# Install tasks
+- name: Install Burp Suite
+  ansible.builtin.include_tasks: install.yml
+  when: installed_version is not defined or installed_version != _burpsuite_installer_version
 
-- block:
-  - name: Read install4j config file
-    ansible.builtin.slurp:
-      src: "{{ burpsuite_dir }}/.install4j/i4jparams.conf"
-    register: install4j_config_contents
+# Burp Suite extras
+- name: Deploy extras
+  ansible.builtin.import_tasks: deploy-extras.yml
 
-  - name: Get current version
-    ansible.builtin.set_fact:
-      installed_version: "{{ install4j_config_contents.content | b64decode |
-          regex_search('applicationVersion=\"[0-9.]+\"', multiline=True) |
-          regex_replace('applicationVersion=\"([0-9.]+)\"', '\\1') }}"
-
-  - name: Current version
-    ansible.builtin.debug:
-      msg: "Burp Suite {{ installed_version }} currently installed"
-  when: install4j_config_file.stat.exists
-
-- name: Retrieve release data from portswigger.net
-  ansible.builtin.set_fact:
-    burp_release_data: "{{ lookup('url', 'https://portswigger.net/burp/releases/data?lastId=-1&pageSize=20') }}"
-
-- name: Get version number
-  ansible.builtin.set_fact:
-    burpsuite_version: "{{ burp_release_data | json_query(\"ResultSet.Results[?releaseChannels[0]=='\" + _burpsuite_release_channel_enum[burpsuite_release_channel] + \"' && builds[?ProductId == '\" + burpsuite_product_type + \"' && ProductPlatform=='Linux']].version | sort(@)[-1:] | [0]\") }}"
-
-- name: Get checksum
-  ansible.builtin.set_fact:
-    burpsuite_installer_sha256_checksum: "{{ burp_release_data | json_query(\"ResultSet.Results[].builds[?Version == '\" + burpsuite_version + \"' && ProductId == '\" + burpsuite_product_type + \"' && ProductPlatform=='Linux'][].Sha256Checksum | [0]\") }}"
-
-- block:
-    - name: Burp Suite version
-      ansible.builtin.debug:
-        msg: "Installing Burp Suite {{ burpsuite_version }} ({{ _burpsuite_release_channel_enum[burpsuite_release_channel] }})"
-
-    - name: Set installer script filename
-      ansible.builtin.set_fact:
-        burpsuite_installer_script: "burpsuite_{{ burpsuite_product_type }}_linux_v{{ burpsuite_version | regex_replace('\\.', '_') }}.sh"
-
-    - name: Download Burp Suite installer
-      ansible.builtin.get_url:
-        url: "{{ burpsuite_download_url }}"
-        dest: "/tmp/{{ burpsuite_installer_script }}"
-        checksum: "sha256:{{ burpsuite_installer_sha256_checksum }}"
-        owner: "{{ burpsuite_user }}"
-        group: "{{ burpsuite_user_details.group }}"
-        mode: "0440"
-      
-    - name: Create response.varfile for unattended install
-      ansible.builtin.template:
-        src: burpsuite_response.varfile.j2
-        dest: "/tmp/burpsuite_response.varfile"
-        owner: "{{ burpsuite_user }}"
-        group: "{{ burpsuite_user_details.group }}"
-        mode: "0440"
-
-    - name: Install Burp Suite
-      ansible.builtin.command:
-        cmd: "/bin/sh {{ burpsuite_installer_script }} -q -varfile burpsuite_response.varfile -overwrite"
-        chdir: "/tmp"
-      become: true
-      become_user: "{{ burpsuite_user }}"
-
-    - name: Clean-up files
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: absent
-      loop:
-        - "/tmp/{{ burpsuite_installer_script }}"
-        - "/tmp/burpsuite_response.varfile"
-  when: installed_version is not defined or installed_version != burpsuite_version
-
-- name: Set Burp Suite extras directory if not defined
-  ansible.builtin.set_fact:
-    burpsuite_extras_dir: "{{ burpsuite_user_details.home }}/BurpSuiteExtras"
-  when: burpsuite_extras_dir is undefined
-
-- name: Create directory for Burp Suite extras
-  ansible.builtin.file:
-    path: "{{ burpsuite_extras_dir }}"
-    state: directory
-    owner: "{{ burpsuite_user }}"
-    group: "{{ burpsuite_user_details.group }}"
-    mode: "0755"
-
-### Tasks to activate Burp Suite ###
-- name: Copy autoburp.py script to extras directory
-  ansible.builtin.copy:
-    src: autoburp.py
-    dest: "{{ burpsuite_extras_dir }}/autoburp.py"
-    owner: "{{ burpsuite_user }}"
-    group: "{{ burpsuite_user_details.group }}"
-    mode: "0644"
-
+# Activate Burp Suite
 - name: Activate Burp Suite and download CA public certificate
   ansible.builtin.command:
-    cmd: "python3 autoburp.py --cacert-path '{{ burpsuite_cacert_path }}' {{ burpsuite_dir }}"
+    cmd: "python3 autoburp.py --cacert-path '{{ burpsuite_cacert_path }}' {{ burpsuite_install_dir }}"
     chdir: "{{ burpsuite_extras_dir }}"
   environment:
-    BURP_LICENSE_KEY: "{{ burpsuite_license_key }}"
+    BURP_LICENSE_KEY: "{{ burpsuite_pro_license_key }}"
   async: 600
   register: autoburp
   changed_when: "'Terms and conditions accepted.' in autoburp.stdout or
@@ -137,37 +43,8 @@
     'Certificate downloaded/updated' in autoburp.stdout"
   become: true
   become_user: "{{ burpsuite_user }}"
+  when: burpsuite_activate
 
-### Tasks to download the Jython and JRuby jar files ###
-- name: Download JRuby for Burp Suite
-  ansible.builtin.get_url:
-    url: "{{ burpsuite_jruby_jar_url }}"
-    dest: "{{ burpsuite_extras_dir }}/jruby-complete.jar"
-    checksum: "{{ burpsuite_jruby_jar_checksum }}"
-    owner: "{{ burpsuite_user }}"
-    group: "{{ burpsuite_user_details.group }}"
-    mode: "0640"
-
-- name: Download Jython for Burp Suite
-  ansible.builtin.get_url:
-    url: "{{ burpsuite_jython_jar_url }}"
-    dest: "{{ burpsuite_extras_dir }}/jython-standalone.jar"
-    checksum: "{{ burpsuite_jython_jar_checksum }}"
-    owner: "{{ burpsuite_user }}"
-    group: "{{ burpsuite_user_details.group }}"
-    mode: "0640"
-
-### Tasks for user config. This will only create the user config if the file doesn't exist ###
-- name: Check for existing user config
-  ansible.builtin.stat:
-    path: "{{ burpsuite_user_details.home }}/.BurpSuite/UserConfig{{ burpsuite_product_type | capitalize }}.json"
-  register: burpsuite_user_config_result
-
-- name: Create Burp Suite user config
-  ansible.builtin.template:
-    src: UserConfig.json.j2
-    dest: "{{ burpsuite_user_details.home }}/.BurpSuite/UserConfig{{ burpsuite_product_type | capitalize }}.json"
-    owner: "{{ burpsuite_user }}"
-    group: "{{ burpsuite_user_details.group }}"
-    mode: "0600"
-  when: not burpsuite_user_config_result.stat.exists
+# Create default user config
+- name: User config
+  ansible.builtin.import_tasks: user-config.yml

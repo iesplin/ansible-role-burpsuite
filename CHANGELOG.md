@@ -1,5 +1,11 @@
 # Changelog
 
+## 2022.05.25
+
+- Changed: Refactored role. Some variables have been renamed and may break existing playbooks.
+- Added: Support for additonal Linux distributions
+- Added: GitHub Actions workflow for testing with Molecule
+
 ## 2021.07.19
 
 - Changed: License key is now provided by value instead of a file.

@@ -1,0 +1,29 @@
+---
+- name: Set installer version
+  ansible.builtin.set_fact:
+    _burpsuite_installer_version: "{{ burpsuite_version }}"
+  when: burpsuite_version != "latest"
+
+- name: Set release channel
+  ansible.builtin.set_fact:
+    burpsuite_channel: "{{ _burpsuite_release_channel_enum[burpsuite_release_channel] }}"
+
+- name: Get user details
+  ansible.builtin.user:
+    name: "{{ burpsuite_user }}"
+  register: burpsuite_user_details
+
+- name: Set burpsuite_install_dir
+  ansible.builtin.set_fact:
+    burpsuite_install_dir: "{{ burpsuite_user_details.home }}/BurpSuite{{ burpsuite_edition | capitalize }}"
+  when: burpsuite_install_dir is undefined
+
+- name: Set burpsuite_extras_dir
+  ansible.builtin.set_fact:
+    burpsuite_extras_dir: "{{ burpsuite_user_details.home }}/BurpSuiteExtras"
+  when: burpsuite_extras_dir is undefined
+
+- name: Set burpsuite_cacert_path
+  ansible.builtin.set_fact:
+    burpsuite_cacert_path: "{{ burpsuite_extras_dir }}/PortSwigger_CA.der"
+  when: burpsuite_cacert_path is undefined

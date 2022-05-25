@@ -1,27 +1,46 @@
-ansible-role-burpsuite
-=========
+# Ansible role: Burp Suite
 
-Ansible role to install Burp Suite.
+Ansible role to install Burp Suite for Linux.
 
-This role by default will download and install the latest version of Burp Suite Community/Pro.
-
-Additional tasks are performed to:
+In addition, this role will also:
 
 - Activate Burp Suite for the specified user (agree to terms, perform license activation)
-- Download the public certificate for generated PortSwigger CA
+- Save the generated PortSwigger CA certificate
 - Download Jython and JRuby standalone jars
-- Set a basic user profile with the Jython and JRuby jars
+- Set a basic user profile with the Jython and JRuby jars paths 
 
-Example Playbook
-----------------
+## Requirements
 
-    - hosts: localhost
-      roles:
-         - role: ansible-role-burpsuite
-           burpsuite_user: hacker
-           burpsuite_license_key: <LICENSE_KEY_STRING>
+This role requires the `jmespath` Python library to be present on the host running the playbook for `json_query` filters.
 
-License
--------
+## Example playbooks
+
+### Burp Suite Community edition
+
+```yaml
+- hosts: localhost
+
+  vars:
+    burpsuite_user: hacker
+
+  roles:
+    - iesplin.burp_suite
+```
+
+### Burp Suite Professional
+
+```yaml
+- hosts: localhost
+
+  vars:
+    burpsuite_user: hacker
+    burpsuite_edition: pro
+    burpsuite_pro_license_key: <LICENSE_KEY_STRING>
+
+  roles:
+    - iesplin.burp_suite
+```
+
+## License
 
 MIT

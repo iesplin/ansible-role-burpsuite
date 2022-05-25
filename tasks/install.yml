@@ -1,0 +1,36 @@
+---
+- name: Set installer script filename
+  ansible.builtin.set_fact:
+    burpsuite_installer_script: "burpsuite_{{ burpsuite_edition }}_linux_v{{ _burpsuite_installer_version | regex_replace('\\.', '_') }}.sh"
+
+- name: Download Burp Suite installer
+  ansible.builtin.get_url:
+    url: "https://portswigger.net/burp/releases/download?product={{ burpsuite_edition }}&type=linux&version={{ _burpsuite_installer_version }}"
+    dest: "/tmp/{{ burpsuite_installer_script }}"
+    checksum: "sha256:{{ burpsuite_installer_sha256_checksum }}"
+    owner: "{{ burpsuite_user }}"
+    group: "{{ burpsuite_user_details.group }}"
+    mode: '0440'
+
+- name: Create response.varfile for unattended install
+  ansible.builtin.template:
+    src: burpsuite_response.varfile.j2
+    dest: /tmp/burpsuite_response.varfile
+    owner: "{{ burpsuite_user }}"
+    group: "{{ burpsuite_user_details.group }}"
+    mode: '0440'
+
+- name: Install Burp Suite
+  ansible.builtin.command:
+    cmd: "/bin/sh {{ burpsuite_installer_script }} -q -varfile burpsuite_response.varfile -overwrite"
+    chdir: /tmp
+  become: true
+  become_user: "{{ burpsuite_user }}"
+
+- name: Clean-up files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/tmp/{{ burpsuite_installer_script }}"
+    - /tmp/burpsuite_response.varfile

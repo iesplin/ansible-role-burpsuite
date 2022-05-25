@@ -1,3 +1,4 @@
+---
 extends: default
 
 rules:
@@ -7,5 +8,11 @@ rules:
   brackets:
     max-spaces-inside: 1
     level: error
-  line-length: disable
-  truthy: disable
+  line-length:
+    max: 180
+    level: warning
+  indentation:
+    indent-sequences: consistent
+    level: warning
+  truthy:
+    check-keys: false

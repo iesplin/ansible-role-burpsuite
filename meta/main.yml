@@ -2,13 +2,21 @@
 galaxy_info:
   role_name: burp_suite
   author: iesplin
-  description: Burp Suite installation for Kali
+  description: Install Burp Suite for Linux
   license: MIT
   min_ansible_version: 2.10
   platforms:
     - name: Kali
       versions:
         - rolling
-  galaxy_tags: []
+    - name: Ubuntu
+      versions:
+        - 22.04
+    - name: Fedora
+      versions:
+        - 36
+  galaxy_tags:
+    - security
+    - web
 
 dependencies: []

@@ -1,0 +1,26 @@
+---
+- name: Create directory for Burp Suite extras
+  ansible.builtin.file:
+    path: "{{ burpsuite_extras_dir }}"
+    state: directory
+    owner: "{{ burpsuite_user }}"
+    group: "{{ burpsuite_user_details.group }}"
+    mode: '0755'
+
+- name: Download jar files
+  ansible.builtin.get_url:
+    url: "{{ item.value.url }}"
+    dest: "{{ burpsuite_extras_dir }}/{{ item.value.jar }}"
+    checksum: "{{ item.value.checksum }}"
+    owner: "{{ burpsuite_user }}"
+    group: "{{ burpsuite_user_details.group }}"
+    mode: '0640'
+  loop: "{{ lookup('dict', burpsuite_extras_jars) }}"
+
+- name: Copy autoburp.py script to extras directory
+  ansible.builtin.copy:
+    src: autoburp.py
+    dest: "{{ burpsuite_extras_dir }}/autoburp.py"
+    owner: "{{ burpsuite_user }}"
+    group: "{{ burpsuite_user_details.group }}"
+    mode: '0644'

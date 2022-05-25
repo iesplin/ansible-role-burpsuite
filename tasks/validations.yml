@@ -1,0 +1,32 @@
+---
+- name: Check for jmespath library on controller
+  community.general.python_requirements_info:
+    dependencies:
+      - jmespath
+  delegate_to: localhost
+  register: python_reqs
+
+- name: jmespath is present
+  ansible.builtin.assert:
+    that:
+      - "'jmespath' not in python_reqs.not_found"
+    fail_msg: Install jmespath on host running the playbook
+    quiet: true
+  changed_when: false
+
+- name: burpsuite_edition is valid
+  ansible.builtin.assert:
+    that:
+      - burpsuite_edition in _burpsuite_edition_enum
+    fail_msg: "{{ burpsuite_edition }} not a valid value for burpsuite_edition"
+    quiet: true
+  changed_when: false
+
+- name: burpsuite_release_channel is valid
+  ansible.builtin.assert:
+    that:
+      - burpsuite_release_channel in _burpsuite_release_channel_enum
+    fail_msg: "burpsuite_release_channel must be either 'stable' or 'early_adopter'"
+    quiet: true
+  changed_when: false
+  when: burpsuite_version == "latest"
