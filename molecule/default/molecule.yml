@@ -5,7 +5,7 @@ driver:
   name: docker
 platforms:
   - name: instance
-    image: ${MOLECULE_DISTRO:-docker.io/kalilinux/kali-rolling:latest}
+    image: ${MOLECULE_DISTRO:-ubuntu:latest}
 provisioner:
   name: ansible
   playbooks:

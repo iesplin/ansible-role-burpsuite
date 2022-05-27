@@ -39,14 +39,16 @@ jobs:
     strategy:
       matrix:
         include:
-          - distro: docker.io/kalilinux/kali-rolling:latest
+          - distro: ubuntu:latest
             playbook: converge.yml
-          - distro: docker.io/kalilinux/kali-rolling:latest
+          - distro: debian:testing
+            playbook: converge.yml
+          - distro: debian:stable
+            playbook: converge.yml
+          - distro: fedora:latest
+            playbook: converge.yml
+          - distro: ubuntu:latest
             playbook: converge-install-version.yml
-          - distro: docker.io/library/ubuntu:22.04
-            playbook: converge.yml
-          - distro: docker.io/library/fedora:36
-            playbook: converge.yml
     steps:
       - name: Check out the codebase.
         uses: actions/checkout@v2
