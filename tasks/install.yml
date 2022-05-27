@@ -10,7 +10,7 @@
     checksum: "sha256:{{ burpsuite_installer_sha256_checksum }}"
     owner: "{{ burpsuite_user }}"
     group: "{{ burpsuite_user_details.group }}"
-    mode: '0440'
+    mode: '0640'
 
 - name: Create response.varfile for unattended install
   ansible.builtin.template:
@@ -18,12 +18,13 @@
     dest: /tmp/burpsuite_response.varfile
     owner: "{{ burpsuite_user }}"
     group: "{{ burpsuite_user_details.group }}"
-    mode: '0440'
+    mode: '0640'
 
 - name: Install Burp Suite
   ansible.builtin.command:
     cmd: "/bin/sh {{ burpsuite_installer_script }} -q -varfile burpsuite_response.varfile -overwrite"
     chdir: /tmp
+  changed_when: true
   become: true
   become_user: "{{ burpsuite_user }}"
 
