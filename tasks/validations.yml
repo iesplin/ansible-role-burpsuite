@@ -1,19 +1,4 @@
 ---
-- name: Check for jmespath library on controller
-  community.general.python_requirements_info:
-    dependencies:
-      - jmespath
-  delegate_to: localhost
-  register: python_reqs
-
-- name: jmespath is present
-  ansible.builtin.assert:
-    that:
-      - "'jmespath' not in python_reqs.not_found"
-    fail_msg: Install jmespath on host running the playbook
-    quiet: true
-  changed_when: false
-
 - name: burpsuite_edition is valid
   ansible.builtin.assert:
     that:
