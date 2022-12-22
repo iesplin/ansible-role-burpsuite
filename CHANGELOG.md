@@ -1,9 +1,14 @@
 # Changelog
 
+## 2022.12.23
+
+- Fixed: queries for selecting latest release
+- Updated: JRuby and Jython versions
+
 ## 2022.05.25
 
 - Changed: Refactored role. Some variables have been renamed and may break existing playbooks.
-- Added: Support for additonal Linux distributions
+- Added: Support for additional Linux distributions
 - Added: GitHub Actions workflow for testing with Molecule
 
 ## 2021.07.19
