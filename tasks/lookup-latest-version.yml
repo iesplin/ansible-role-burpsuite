@@ -1,33 +1,22 @@
 ---
-- name: Retrieve release data from portswigger.net
+- name: Retrieve data from PortSwigger releases API
   ansible.builtin.set_fact:
     burp_release_data: "{{ lookup('url', 'https://portswigger.net/burp/releases/data?lastId=-1&pageSize=20') }}"
 
-- name: Identify latest version number for release channel
+- name: Get latest release
   ansible.builtin.set_fact:
-    _burpsuite_installer_version: "{{ burp_release_data | json_query(version_query) }}"
+    burp_latest_release: "{{ burp_release_data | community.general.json_query(latest_release_query) }}"
   vars:
-    version_query: >-
-      ResultSet.Results[?
-        releaseChannels[0] == '{{ burpsuite_channel }}' &&
-        builds[?
-          ProductId == '{{ burpsuite_edition }}' &&
-          ProductPlatform == 'Linux'
-        ]
-      ].version | sort(@)[-1:] | [0]
+    latest_release_query: >-
+      ResultSet.Results[?contains(@.releaseChannels, '{{ burpsuite_channel }}')].builds[] 
+      | [?ProductId == '{{ burpsuite_edition }}' && ProductPlatform == 'Linux']
+      | [0]
+
+- name: Set release facts
+  ansible.builtin.set_fact:
+    _burpsuite_installer_version: "{{ burp_latest_release | community.general.json_query('@.Version') }}"
+    burpsuite_installer_sha256_checksum: "{{ burp_latest_release | community.general.json_query('@.Sha256Checksum') }}"
 
 - name: Latest version
   ansible.builtin.debug:
     msg: "Latest version for Burp Suite {{ burpsuite_edition | capitalize }} ({{ burpsuite_channel }}) is {{ _burpsuite_installer_version }}"
-
-- name: Identify installer checksum
-  ansible.builtin.set_fact:
-    burpsuite_installer_sha256_checksum: "{{ burp_release_data | json_query(checksum_query) }}"
-  vars:
-    checksum_query: >-
-      ResultSet.Results[].builds[?
-        Version == '{{ _burpsuite_installer_version }}' &&
-        ProductId == '{{ burpsuite_edition }}' &&
-        ProductPlatform == 'Linux'
-      ][].Sha256Checksum
-      | [0]
