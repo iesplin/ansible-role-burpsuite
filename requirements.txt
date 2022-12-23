@@ -1,0 +1,6 @@
+ansible
+molecule
+# Pin to 2.0.0 - https://github.com/ansible-community/molecule-docker/issues/184
+molecule-docker==2.0.0
+docker
+jmespath

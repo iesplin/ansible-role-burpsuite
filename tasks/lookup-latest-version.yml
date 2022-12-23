@@ -8,7 +8,7 @@
     burp_latest_release: "{{ burp_release_data | community.general.json_query(latest_release_query) }}"
   vars:
     latest_release_query: >-
-      ResultSet.Results[?contains(@.releaseChannels, '{{ burpsuite_channel }}')].builds[] 
+      ResultSet.Results[?contains(@.releaseChannels, '{{ burpsuite_channel }}')].builds[]
       | [?ProductId == '{{ burpsuite_edition }}' && ProductPlatform == 'Linux']
       | [0]
 
