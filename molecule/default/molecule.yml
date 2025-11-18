@@ -2,7 +2,7 @@
 dependency:
   name: galaxy
 driver:
-  name: docker
+  name: podman
 platforms:
   - name: instance
     image: ${MOLECULE_DISTRO:-ubuntu:latest}
