@@ -1,11 +1,11 @@
 ---
 - name: Retrieve data from PortSwigger releases API
   ansible.builtin.set_fact:
-    burp_release_data: "{{ lookup('url', 'https://portswigger.net/burp/releases/data?lastId=-1&pageSize=20') }}"
+    burp_release_data: "{{ lookup('ansible.builtin.url', 'https://portswigger.net/burp/releases/data?previousLastId=-1&lastId=-1&t=1763505560645&pageSize=10') }}"
 
 - name: Get latest release
   ansible.builtin.set_fact:
-    burp_latest_release: "{{ burp_release_data | community.general.json_query(latest_release_query) }}"
+    burp_latest_release: "{{ burp_release_data | from_json | community.general.json_query(latest_release_query) }}"
   vars:
     latest_release_query: >-
       ResultSet.Results[?contains(@.releaseChannels, '{{ burpsuite_channel }}')].builds[]
