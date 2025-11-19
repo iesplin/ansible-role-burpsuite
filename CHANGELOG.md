@@ -1,5 +1,11 @@
 # Changelog
 
+## 2025.11.19
+
+- Fixed: Enforced JSON conversion for Burp release data to resolve version lookup failures.
+- Updated: JRuby and Jython versions
+- Updated: Switch to podman for testing
+
 ## 2022.12.23
 
 - Fixed: queries for selecting latest release
