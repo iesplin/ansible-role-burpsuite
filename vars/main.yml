@@ -8,3 +8,7 @@ _burpsuite_edition_enum:
 _burpsuite_release_channel_enum:
   stable: Stable
   early_adopter: Early Adopter
+
+_burpsuite_category_enum:
+  community: Community
+  pro: Professional

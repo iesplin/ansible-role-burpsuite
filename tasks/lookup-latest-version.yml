@@ -1,21 +1,31 @@
 ---
 - name: Retrieve data from PortSwigger releases API
-  ansible.builtin.set_fact:
-    burp_release_data: "{{ lookup('ansible.builtin.url', 'https://portswigger.net/burp/releases/data?previousLastId=-1&lastId=-1&t=1763505560645&pageSize=10') }}"
+  ansible.builtin.uri:
+    url: "https://portswigger.net/burp/releases/data?previousLastId=-1&lastId=-1&pageSize=10"
+    return_content: yes
+  register: burp_release_data
 
 - name: Get latest release
   ansible.builtin.set_fact:
-    burp_latest_release: "{{ burp_release_data | from_json | community.general.json_query(latest_release_query) }}"
+    burp_latest_release: "{{ burp_release_data.json | community.general.json_query(latest_release_query) }}"
   vars:
     latest_release_query: >-
-      ResultSet.Results[?contains(@.releaseChannels, '{{ burpsuite_channel }}')].builds[]
-      | [?ProductId == '{{ burpsuite_edition }}' && ProductPlatform == 'Linux']
+      ResultSet.Results[?contains(@.releaseChannels, '{{ burpsuite_channel }}') && contains(@.categories, '{{ burpsuite_category }}')].builds[]
+      | [?BuildCategoryId == '{{ burpsuite_edition }}' && BuildCategoryPlatform == 'Linux']
       | [0]
 
 - name: Set release facts
   ansible.builtin.set_fact:
     _burpsuite_installer_version: "{{ burp_latest_release | community.general.json_query('@.Version') }}"
     burpsuite_installer_sha256_checksum: "{{ burp_latest_release | community.general.json_query('@.Sha256Checksum') }}"
+
+- name: Assert that latest version was retrieved
+  ansible.builtin.assert:
+    that:
+      - _burpsuite_installer_version is defined
+      - _burpsuite_installer_version != ''
+    fail_msg: "Failed to retrieve latest version for Burp Suite {{ burpsuite_edition | capitalize }} ({{ burpsuite_channel }})"
+    quiet: true
 
 - name: Latest version
   ansible.builtin.debug:

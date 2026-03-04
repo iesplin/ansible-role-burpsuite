@@ -7,7 +7,8 @@
 - name: Set release channel
   ansible.builtin.set_fact:
     burpsuite_channel: "{{ _burpsuite_release_channel_enum[burpsuite_release_channel] }}"
-
+    burpsuite_category: "{{ _burpsuite_category_enum[burpsuite_edition] }}"
+    
 - name: Get user details
   ansible.builtin.user:
     name: "{{ burpsuite_user }}"
