@@ -35,8 +35,8 @@ burpsuite_release_channel: stable
 burpsuite_extras_jars:
   jruby:
     jar: jruby-complete.jar
-    url: https://repo1.maven.org/maven2/org/jruby/jruby-complete/9.4.14.0/jruby-complete-9.4.14.0.jar
-    checksum: sha256:d7779641a18c46af5ee502c4a936dde17d4c0c4e6c35544aebb3a8d096fd53c9
+    url: https://repo1.maven.org/maven2/org/jruby/jruby-complete/10.0.3.0/jruby-complete-10.0.3.0.jar
+    checksum: sha256:be31ed301993e276eae43a5d945cb921324f87b1962e7f7d26cdfe25370da4d8
   jython:
     jar: jython-standalone.jar
     url: https://repo1.maven.org/maven2/org/python/jython-standalone/2.7.4/jython-standalone-2.7.4.jar
