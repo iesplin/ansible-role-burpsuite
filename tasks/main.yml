@@ -11,10 +11,10 @@
 
 # OS dependencies
 - ansible.builtin.include_tasks: setup-debian.yml
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts['os_family'] == 'Debian'
 
 - ansible.builtin.include_tasks: setup-redhat.yml
-  when: ansible_os_family == 'RedHat'
+  when: ansible_facts['os_family'] == 'RedHat'
 
 # Check previous installation
 - name: Check for previous Burp Suite installation
