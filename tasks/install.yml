@@ -11,6 +11,7 @@
     owner: "{{ burpsuite_user }}"
     group: "{{ burpsuite_user_details.group }}"
     mode: '0640'
+    timeout: 120
 
 - name: Create response.varfile for unattended install
   ansible.builtin.template:
