@@ -1,0 +1,27 @@
+---
+- name: Fetch release data from PortSwigger releases API
+  ansible.builtin.uri:
+    url: "https://portswigger.net/burp/releases/data?previousLastId={{ _burpsuite_release_previous_last_id }}"
+    return_content: true
+    timeout: 60
+  register: _burpsuite_release_data
+
+- name: Identify latest version on this page
+  ansible.builtin.set_fact:
+    _burpsuite_latest_release: >-
+      {{ _burpsuite_release_data.json.ResultSet.Results
+         | selectattr('releaseChannels', 'contains', _burpsuite_channel)
+         | selectattr('categories', 'contains', 'Desktop')
+         | map(attribute='builds') | flatten(levels=1)
+         | selectattr('BuildCategoryPlatform', '==', _burpsuite_platform)
+         | first | default({}) }}
+    _burpsuite_release_previous_last_id: "{{ _burpsuite_release_data.json.ResultSet.Results | map(attribute='id') | list | last | default(-1) }}"
+    _burpsuite_release_has_more: "{{ _burpsuite_release_data.json.ResultSet.HasMoreResults | default(false) }}"
+    _burpsuite_release_page: "{{ _burpsuite_release_page | int + 1 }}"
+
+- name: Search next page of releases
+  ansible.builtin.include_tasks: lookup-releases-page.yml
+  when:
+    - _burpsuite_latest_release | length == 0
+    - _burpsuite_release_has_more | bool
+    - _burpsuite_release_page | int < _burpsuite_release_max_pages

@@ -1,14 +1,8 @@
 ---
 # vars file for ansible-role-burpsuite
 
-_burpsuite_edition_enum:
-  community: community
-  pro: pro
+_burpsuite_platform_enum:
+  x86_64: Linux
+  aarch64: LinuxArm64
 
-_burpsuite_release_channel_enum:
-  stable: Stable
-  early_adopter: Early Adopter
-
-_burpsuite_category_enum:
-  community: Community
-  pro: Professional
+_burpsuite_release_max_pages: 5

@@ -1,17 +1,64 @@
 ---
-- name: burpsuite_edition is valid
+- name: Removed burpsuite_release_channel variable is not set
   ansible.builtin.assert:
     that:
-      - burpsuite_edition in _burpsuite_edition_enum
-    fail_msg: "{{ burpsuite_edition }} not a valid value for burpsuite_edition"
+      - burpsuite_release_channel is not defined
+    fail_msg: "burpsuite_release_channel has been replaced by burpsuite_early_adopter. Set burpsuite_early_adopter: true for the Early Adopter channel."
     quiet: true
-  changed_when: false
 
-- name: burpsuite_release_channel is valid
+- name: Removed version and edition variables are not set
   ansible.builtin.assert:
     that:
-      - burpsuite_release_channel in _burpsuite_release_channel_enum
-    fail_msg: "burpsuite_release_channel must be either 'stable' or 'early_adopter'"
+      - burpsuite_version is not defined
+      - burpsuite_edition is not defined
+      - burpsuite_installer_sha256_checksum is not defined
+    fail_msg: >-
+      burpsuite_version, burpsuite_edition and burpsuite_installer_sha256_checksum have been removed.
+      The latest release from the selected channel is always installed, and the edition is set by burpsuite_pro_license_key.
     quiet: true
-  changed_when: false
-  when: burpsuite_version == "latest"
+
+- name: Removed burpsuite_install_dir variable is not set
+  ansible.builtin.assert:
+    that:
+      - burpsuite_install_dir is not defined
+    fail_msg: "burpsuite_install_dir has been removed. Burp Suite is always installed to ~/BurpSuite for the user running the role."
+    quiet: true
+
+- name: Removed burpsuite_user variable is not set
+  ansible.builtin.assert:
+    that:
+      - burpsuite_user is not defined
+    fail_msg: >-
+      burpsuite_user has been removed. Burp Suite is installed for the user running the role.
+      Set become: true and become_user on the role to install for another user.
+    quiet: true
+
+- name: CPU architecture is supported
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['architecture'] in _burpsuite_platform_enum
+    fail_msg: >-
+      Unsupported CPU architecture '{{ ansible_facts['architecture'] }}'.
+      Supported architectures: {{ _burpsuite_platform_enum | list | join(', ') }}
+    quiet: true
+
+- name: Check pexpect is installed
+  when: burpsuite_activate | bool
+  block:
+
+    - name: Import pexpect
+      ansible.builtin.command:
+        cmd: python3 -c 'import pexpect'
+      register: _burpsuite_pexpect_check
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    - name: Python pexpect library is installed
+      ansible.builtin.assert:
+        that:
+          - _burpsuite_pexpect_check.rc == 0
+        fail_msg: >-
+          The Python pexpect library is required for Burp Suite activation.
+          Install it before running this role (e.g. the python3-pexpect package), or set burpsuite_activate: false.
+        quiet: true

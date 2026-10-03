@@ -1,0 +1,23 @@
+---
+- name: Check for existing installation
+  ansible.builtin.stat:
+    path: "{{ _burpsuite_install_dir }}/.install4j/i4jparams.conf"
+  register: _burpsuite_install_config_stat
+
+- name: Read install4j config
+  ansible.builtin.slurp:
+    src: "{{ _burpsuite_install_dir }}/.install4j/i4jparams.conf"
+  register: _burpsuite_i4jparams
+  when: _burpsuite_install_config_stat.stat.exists
+
+- name: Set installed version fact
+  ansible.builtin.set_fact:
+    _burpsuite_installed_version: >-
+      {{ (_burpsuite_i4jparams.content | b64decode
+          | regex_search('<general\b[^>]*\bapplicationVersion="([^"]+)"', '\1') | default([''], true) | first)
+         if _burpsuite_install_config_stat.stat.exists else '' }}
+
+- name: Installed version
+  ansible.builtin.debug:
+    msg: "Installed Burp Suite version is {{ _burpsuite_installed_version }}"
+  when: _burpsuite_installed_version | length > 0

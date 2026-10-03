@@ -1,30 +1,30 @@
 ---
-- name: Set installer version
-  ansible.builtin.set_fact:
-    _burpsuite_installer_version: "{{ burpsuite_version }}"
-  when: burpsuite_version != "latest"
-
 - name: Set release channel
   ansible.builtin.set_fact:
-    burpsuite_channel: "{{ _burpsuite_release_channel_enum[burpsuite_release_channel] }}"
-    burpsuite_category: "{{ _burpsuite_category_enum[burpsuite_edition] }}"
-    
+    _burpsuite_channel: "{{ 'Early Adopter' if burpsuite_early_adopter | bool else 'Stable' }}"
+
+- name: Set platform
+  ansible.builtin.set_fact:
+    _burpsuite_platform: "{{ _burpsuite_platform_enum[ansible_facts['architecture']] }}"
+
+- name: Get name of the user running the role
+  ansible.builtin.command:
+    cmd: id -un
+  register: _burpsuite_user_name
+  changed_when: false
+  check_mode: false
+
 - name: Get user details
-  ansible.builtin.user:
-    name: "{{ burpsuite_user }}"
-  register: burpsuite_user_details
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ _burpsuite_user_name.stdout }}"
 
-- name: Set burpsuite_install_dir
+# getent passwd fields: password, uid, gid, gecos, home, shell
+- name: Set user home
   ansible.builtin.set_fact:
-    burpsuite_install_dir: "{{ burpsuite_user_details.home }}/BurpSuite{{ burpsuite_edition | capitalize }}"
-  when: burpsuite_install_dir is undefined
+    _burpsuite_user_home: "{{ ansible_facts['getent_passwd'][_burpsuite_user_name.stdout][4] }}"
 
-- name: Set burpsuite_extras_dir
+- name: Set install directory and user config path
   ansible.builtin.set_fact:
-    burpsuite_extras_dir: "{{ burpsuite_user_details.home }}/BurpSuiteExtras"
-  when: burpsuite_extras_dir is undefined
-
-- name: Set burpsuite_cacert_path
-  ansible.builtin.set_fact:
-    burpsuite_cacert_path: "{{ burpsuite_extras_dir }}/PortSwigger_CA.der"
-  when: burpsuite_cacert_path is undefined
+    _burpsuite_install_dir: "{{ _burpsuite_user_home }}/BurpSuite"
+    _burpsuite_user_config_path: "{{ _burpsuite_user_home }}/.BurpSuite/UserConfig.json"

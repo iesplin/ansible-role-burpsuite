@@ -1,49 +1,55 @@
 ---
 # tasks file for ansible-role-burpsuite
 
-- ansible.builtin.import_tasks: validations.yml
+- name: Validate variables
+  ansible.builtin.import_tasks: validations.yml
 
-- ansible.builtin.import_tasks: variables.yml
-
-- name: Lookup latest version data
-  ansible.builtin.include_tasks: lookup-latest-version.yml
-  when: burpsuite_version == "latest"
-
-# OS dependencies
-- ansible.builtin.include_tasks: setup-debian.yml
-  when: ansible_facts['os_family'] == 'Debian'
-
-- ansible.builtin.include_tasks: setup-redhat.yml
-  when: ansible_facts['os_family'] == 'RedHat'
+- name: Set variables
+  ansible.builtin.import_tasks: variables.yml
 
 # Check previous installation
-- name: Check for previous Burp Suite installation
-  ansible.builtin.import_tasks: check-previous-install.yml
+- name: Installed Burp Suite version
+  ansible.builtin.import_tasks: installed-version.yml
+
+- name: Lookup latest releases from PortSwigger
+  ansible.builtin.include_tasks: lookup-releases.yml
 
 # Install tasks
 - name: Install Burp Suite
   ansible.builtin.include_tasks: install.yml
-  when: installed_version is not defined or installed_version != _burpsuite_installer_version
+  when: _burpsuite_installed_version != _burpsuite_installer_version
 
 # Burp Suite extras
 - name: Deploy extras
   ansible.builtin.import_tasks: deploy-extras.yml
 
 # Activate Burp Suite
-- name: Activate Burp Suite and download CA public certificate
-  ansible.builtin.command:
-    cmd: "python3 autoburp.py --cacert-path '{{ burpsuite_cacert_path }}' {{ burpsuite_install_dir }}"
-    chdir: "{{ burpsuite_extras_dir }}"
-  environment:
-    BURP_LICENSE_KEY: "{{ burpsuite_pro_license_key }}"
-  async: 600
-  register: autoburp
-  changed_when: "'Terms and conditions accepted.' in autoburp.stdout or
-    'License successfully installed and activated.' in autoburp.stdout or
-    'Certificate downloaded/updated' in autoburp.stdout"
-  become: true
-  become_user: "{{ burpsuite_user }}"
-  when: burpsuite_activate
+- name: Activate Burp Suite
+  when: burpsuite_activate | bool
+  block:
+
+    - name: Activate Burp Suite and download CA public certificate
+      ansible.builtin.command:
+        cmd: "python3 burp_activate.py --cacert-path {{ burpsuite_cacert_path | quote }} {{ _burpsuite_install_dir | quote }}"
+        chdir: "{{ burpsuite_extras_dir }}"
+      environment:
+        BURP_LICENSE_KEY: "{{ burpsuite_pro_license_key }}"
+      async: 600
+      register: _burpsuite_activation
+      changed_when: >-
+        ('Your license is successfully installed and activated' in _burpsuite_activation.stdout or
+        'Certificate downloaded/updated' in _burpsuite_activation.stdout)
+      no_log: "{{ burpsuite_pro_license_key | length > 0 }}"
+
+  rescue:
+
+    - name: Show activation output
+      ansible.builtin.debug:
+        var: _burpsuite_activation.stdout_lines
+
+    - name: Fail on activation error
+      ansible.builtin.fail:
+        msg: "Burp Suite activation failed (exit code {{ _burpsuite_activation.rc | default('unknown') }}). See output above."
 
 # Create default user config
 - name: User config

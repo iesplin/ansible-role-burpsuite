@@ -1,0 +1,28 @@
+---
+- name: Initialise release lookup
+  ansible.builtin.set_fact:
+    _burpsuite_latest_release: {}
+    _burpsuite_release_previous_last_id: -1
+    _burpsuite_release_page: 0
+
+- name: Search release pages
+  ansible.builtin.include_tasks: lookup-releases-page.yml
+
+- name: Set release version facts
+  ansible.builtin.set_fact:
+    _burpsuite_installer_version: "{{ _burpsuite_latest_release.Version | default('') }}"
+    _burpsuite_installer_sha256_checksum: "{{ _burpsuite_latest_release.Sha256Checksum | default('') }}"
+
+- name: Assert that latest version was retrieved
+  ansible.builtin.assert:
+    that:
+      - _burpsuite_installer_version is defined
+      - _burpsuite_installer_version != ''
+    fail_msg: >-
+      Failed to retrieve latest version for Burp Suite ({{ _burpsuite_channel }})
+      in the first {{ _burpsuite_release_page }} page(s) of releases
+    quiet: true
+
+- name: Show latest version
+  ansible.builtin.debug:
+    msg: "Latest Burp Suite ({{ _burpsuite_channel }}) version is {{ _burpsuite_installer_version }}"

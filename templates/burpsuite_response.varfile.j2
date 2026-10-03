@@ -1,6 +1,10 @@
 # install4j response file for Burp Suite
+executeLauncherAction$Boolean=false
 sys.adminRights$Boolean=false
-sys.installationDir={{ burpsuite_install_dir }}
+sys.fileAssociation.extensions$StringArray=
+sys.fileAssociation.launchers$StringArray=
+sys.installForAllUsers$Boolean=false
+sys.installationDir={{ _burpsuite_install_dir }}
 sys.languageId=en
-sys.programGroupDisabled$Boolean=false
-sys.symlinkDir={{ burpsuite_user_details.home }}/.local/bin
+sys.programGroupDisabled$Boolean=true
+sys.symlinkDir={{ _burpsuite_user_home }}/.local/bin

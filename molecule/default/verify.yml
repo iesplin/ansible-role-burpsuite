@@ -1,0 +1,55 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+
+  vars:
+    burpsuite_user: hacker
+
+  tasks:
+    - name: Get user details
+      ansible.builtin.getent:
+        database: passwd
+        key: "{{ burpsuite_user }}"
+
+    - name: Set user home
+      ansible.builtin.set_fact:
+        user_home: "{{ ansible_facts['getent_passwd'][burpsuite_user][4] }}"
+
+    - name: Check installed files
+      ansible.builtin.stat:
+        path: "{{ user_home }}/{{ item }}"
+      loop:
+        - BurpSuite/burpsuite.jar
+        - BurpSuite/jre/bin/java
+        - BurpSuiteExtras/burp_activate.py
+        - BurpSuiteExtras/jruby-complete.jar
+        - BurpSuiteExtras/jython-standalone.jar
+        - BurpSuiteExtras/PortSwigger_CA.der
+        - .BurpSuite/UserConfig.json
+      register: installed_files
+
+    - name: Assert installed files exist and are owned by the user
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.pw_name == burpsuite_user
+        fail_msg: "{{ item.item }} is missing or not owned by {{ burpsuite_user }}"
+        quiet: true
+      loop: "{{ installed_files.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Read user config
+      ansible.builtin.slurp:
+        src: "{{ user_home }}/.BurpSuite/UserConfig.json"
+      register: user_config
+
+    - name: Assert user config has jar paths
+      ansible.builtin.assert:
+        that:
+          - extender.ruby.location_of_jruby_jar_file == user_home ~ '/BurpSuiteExtras/jruby-complete.jar'
+          - extender.python.location_of_jython_standalone_jar_file == user_home ~ '/BurpSuiteExtras/jython-standalone.jar'
+        quiet: true
+      vars:
+        extender: "{{ (user_config.content | b64decode | from_json).user_options.extender }}"

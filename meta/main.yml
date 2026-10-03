@@ -1,20 +1,21 @@
 ---
 galaxy_info:
   role_name: burp_suite
+  namespace: iesplin
   author: iesplin
   description: Install Burp Suite for Linux
   license: MIT
-  min_ansible_version: 2.10
+  min_ansible_version: "2.15"
   platforms:
     - name: Debian
       versions:
-        - bullseye
+        - all
     - name: Ubuntu
       versions:
-        - jammy
+        - all
     - name: Fedora
       versions:
-        - 36
+        - all
   galaxy_tags:
     - security
     - web

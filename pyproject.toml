@@ -1,0 +1,11 @@
+[project]
+name = "ansible-role-burpsuite"
+version = "2.0.0"
+requires-python = ">=3.11"
+dependencies = [
+    "ansible>=12.2.0",
+    "ansible-lint>=26.9.0",
+    "molecule>=25.11.0",
+    "molecule-plugins[podman]>=25.8.12",
+    "yamllint>=1.38.0",
+]

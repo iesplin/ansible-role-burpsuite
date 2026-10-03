@@ -6,14 +6,24 @@ on:
     tags:
       - '*'
 
+permissions:
+  contents: read
+
 jobs:
-  build:
+  release:
+    name: Release
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
-        uses: actions/checkout@v2
-
-      - name: galaxy
-        uses: robertdebock/galaxy-action@1.2.0
+      - name: Set up Python 3.
+        uses: actions/setup-python@v6
         with:
-          galaxy_api_key: ${{ secrets.galaxy_api_key }}
+          python-version: "3.13"
+
+      - name: Install Ansible.
+        run: pip3 install ansible-core
+
+      - name: Trigger a new import on Galaxy.
+        run: >-
+          ansible-galaxy role import
+          --api-key ${{ secrets.galaxy_api_key }}
+          ${{ github.repository_owner }} ${{ github.event.repository.name }}

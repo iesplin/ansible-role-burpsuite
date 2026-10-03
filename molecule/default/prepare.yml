@@ -1,0 +1,23 @@
+---
+- name: Prepare
+  hosts: all
+
+  tasks:
+    - name: Install Debian packages
+      ansible.builtin.apt:
+        name:
+          - libfontconfig1
+          - libfreetype6
+          - python3-pexpect
+        state: present
+        update_cache: true
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Install RedHat packages
+      ansible.builtin.dnf:
+        name:
+          - fontconfig
+          - freetype
+          - python3-pexpect
+        state: present
+      when: ansible_facts['os_family'] == 'RedHat'

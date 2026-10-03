@@ -1,42 +1,27 @@
 ---
 # defaults file for ansible-role-burpsuite
 
-# User to install as
-burpsuite_user: hacker
-
-# Automatically activate/license Burp Suite
+# Automated Burp Suite activation
 burpsuite_activate: true
-
-# Burp Suite edition: community or pro
-burpsuite_edition: community
 
 # Burp Suite Pro license key content. Leave empty for Burp Suite Community edition
 burpsuite_pro_license_key: ''
 
-# Version to install - "latest" or exact version e.g. "2020.9.2"
-burpsuite_version: latest
+# Install from the Early Adopter release channel instead of Stable
+burpsuite_early_adopter: false
 
-# Release channel to use when version is latest: stable or early_adopter
-burpsuite_release_channel: stable
-
-# SHA256 checksum for Burp Suite installer. Required if burpsuite_version is set to an exact version
-# burpsuite_installer_sha256_checksum:
-
-# Burp Suite install directory. If left undefined, it will install under the user's home directory
-# burpsuite_install_dir:
-
-# Extras directory for jars and activation script. If left undefined, it will install under the user's home directory
-# burpsuite_extras_dir:
+# Extras directory for jars and activation script. Defaults to a directory under the user's home directory
+burpsuite_extras_dir: "{{ _burpsuite_user_home }}/BurpSuiteExtras"
 
 # Path to save the Burp Suite CA public certificate
-# burpsuite_cacert_path: "{{ burpsuite_extras_dir }}/PortSwigger_CA.der"
+burpsuite_cacert_path: "{{ burpsuite_extras_dir }}/PortSwigger_CA.der"
 
 # Additional jar files
 burpsuite_extras_jars:
   jruby:
     jar: jruby-complete.jar
-    url: https://repo1.maven.org/maven2/org/jruby/jruby-complete/10.0.3.0/jruby-complete-10.0.3.0.jar
-    checksum: sha256:be31ed301993e276eae43a5d945cb921324f87b1962e7f7d26cdfe25370da4d8
+    url: https://repo1.maven.org/maven2/org/jruby/jruby-complete/10.1.2.0/jruby-complete-10.1.2.0.jar
+    checksum: sha256:decb15ddef5eebf596fbd77f10483a23a1b031930d283ada2aafa5841cd0d603
   jython:
     jar: jython-standalone.jar
     url: https://repo1.maven.org/maven2/org/python/jython-standalone/2.7.4/jython-standalone-2.7.4.jar

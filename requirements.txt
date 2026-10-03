@@ -1,4 +1,0 @@
-ansible
-molecule
-molecule-plugins[podman]
-jmespath

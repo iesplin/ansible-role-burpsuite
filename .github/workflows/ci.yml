@@ -6,8 +6,9 @@ on:
   push:
     branches:
       - master
-  schedule:
-    - cron: "30 1 * * 2"
+
+permissions:
+  contents: read
 
 defaults:
   run:
@@ -28,28 +29,27 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Set up uv.
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+
       - name: Install test dependencies.
-        run: pip3 install yamllint
+        run: uv sync --locked
 
       - name: Lint code.
-        run: yamllint .
+        run: |
+          uv run yamllint .
+          uv run ansible-lint
 
   molecule:
     name: Molecule
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
-          - distro: ubuntu:latest
-            playbook: converge.yml
-          - distro: debian:testing
-            playbook: converge.yml
-          - distro: debian:stable
-            playbook: converge.yml
-          - distro: fedora:latest
-            playbook: converge.yml
-          - distro: ubuntu:latest
-            playbook: converge-install-version.yml
+        distro:
+          - ubuntu:latest
+          - debian:testing
+          - debian:stable
+          - fedora:latest
     steps:
       - name: Check out the codebase.
         uses: actions/checkout@v5
@@ -61,13 +61,15 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Set up uv.
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+
       - name: Install test dependencies.
-        run: pip3 install -r requirements.txt
+        run: uv sync --locked
 
       - name: Run Molecule tests.
-        run: molecule test
+        run: uv run molecule test
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ${{ matrix.distro }}
-          MOLECULE_PLAYBOOK: ${{ matrix.playbook }}

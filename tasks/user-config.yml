@@ -1,32 +1,40 @@
 ---
+- name: Create Burp Suite user config directory
+  ansible.builtin.file:
+    path: "{{ _burpsuite_user_config_path | dirname }}"
+    state: directory
+    mode: '0700'
+
 - name: Check for existing user config
   ansible.builtin.stat:
-    path: "{{ burpsuite_user_details.home }}/.BurpSuite/UserConfig{{ burpsuite_edition | capitalize }}.json"
-  register: burpsuite_user_config_stat
+    path: "{{ _burpsuite_user_config_path }}"
+  register: _burpsuite_user_config_stat
 
 # Create basic user config
 - name: Create Burp Suite user config
   ansible.builtin.template:
     src: UserConfig.json.j2
-    dest: "{{ burpsuite_user_details.home }}/.BurpSuite/UserConfig{{ burpsuite_edition | capitalize }}.json"
-    owner: "{{ burpsuite_user }}"
-    group: "{{ burpsuite_user_details.group }}"
+    dest: "{{ _burpsuite_user_config_path }}"
     mode: '0600'
-  when: not burpsuite_user_config_stat.stat.exists
+  when: not _burpsuite_user_config_stat.stat.exists
 
 # Otherwise, update existing user config
 - name: Update jruby path
   ansible.builtin.lineinfile:
-    path: "{{ burpsuite_user_details.home }}/.BurpSuite/UserConfig{{ burpsuite_edition | capitalize }}.json"
+    path: "{{ _burpsuite_user_config_path }}"
     regexp: '^(.*)"location_of_jruby_jar_file":".*'
     line: '\1"location_of_jruby_jar_file":"{{ burpsuite_extras_dir }}/{{ burpsuite_extras_jars.jruby.jar }}"'
     backrefs: true
-  when: burpsuite_user_config_stat.stat.exists
+  when:
+    - _burpsuite_user_config_stat.stat.exists
+    - "'jruby' in burpsuite_extras_jars"
 
 - name: Update jython path
   ansible.builtin.lineinfile:
-    path: "{{ burpsuite_user_details.home }}/.BurpSuite/UserConfig{{ burpsuite_edition | capitalize }}.json"
+    path: "{{ _burpsuite_user_config_path }}"
     regexp: '^(.*)"location_of_jython_standalone_jar_file":".*'
     line: '\1"location_of_jython_standalone_jar_file":"{{ burpsuite_extras_dir }}/{{ burpsuite_extras_jars.jython.jar }}"'
     backrefs: true
-  when: burpsuite_user_config_stat.stat.exists
+  when:
+    - _burpsuite_user_config_stat.stat.exists
+    - "'jython' in burpsuite_extras_jars"

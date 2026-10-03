@@ -1,38 +1,40 @@
 ---
 - name: Set installer script filename
   ansible.builtin.set_fact:
-    burpsuite_installer_script: "burpsuite_{{ burpsuite_edition }}_linux_v{{ _burpsuite_installer_version | regex_replace('\\.', '_') }}.sh"
+    _burpsuite_installer_script: "burpsuite_{{ _burpsuite_platform }}_v{{ _burpsuite_installer_version | regex_replace('\\.', '_') }}.sh"
 
-- name: Download Burp Suite installer
-  ansible.builtin.get_url:
-    url: "https://portswigger.net/burp/releases/download?product={{ burpsuite_edition }}&type=linux&version={{ _burpsuite_installer_version }}"
-    dest: "/tmp/{{ burpsuite_installer_script }}"
-    checksum: "sha256:{{ burpsuite_installer_sha256_checksum }}"
-    owner: "{{ burpsuite_user }}"
-    group: "{{ burpsuite_user_details.group }}"
-    mode: '0640'
-    timeout: 120
+- name: Create temporary directory for installer files
+  ansible.builtin.tempfile:
+    state: directory
+    prefix: burpsuite_
+  register: _burpsuite_installer_tmpdir
 
-- name: Create response.varfile for unattended install
-  ansible.builtin.template:
-    src: burpsuite_response.varfile.j2
-    dest: /tmp/burpsuite_response.varfile
-    owner: "{{ burpsuite_user }}"
-    group: "{{ burpsuite_user_details.group }}"
-    mode: '0640'
+- name: Download and run installer
+  block:
 
-- name: Install Burp Suite
-  ansible.builtin.command:
-    cmd: "/bin/sh {{ burpsuite_installer_script }} -q -varfile burpsuite_response.varfile -overwrite"
-    chdir: /tmp
-  changed_when: true
-  become: true
-  become_user: "{{ burpsuite_user }}"
+    - name: Download Burp Suite installer
+      ansible.builtin.get_url:
+        url: "https://portswigger.net/burp/releases/startdownload?product=desktop&version={{ _burpsuite_installer_version }}&type={{ _burpsuite_platform }}"
+        dest: "{{ _burpsuite_installer_tmpdir.path }}/{{ _burpsuite_installer_script }}"
+        checksum: "sha256:{{ _burpsuite_installer_sha256_checksum }}"
+        mode: '0640'
+        timeout: 120
 
-- name: Clean-up files
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: absent
-  loop:
-    - "/tmp/{{ burpsuite_installer_script }}"
-    - /tmp/burpsuite_response.varfile
+    - name: Create response.varfile for unattended install
+      ansible.builtin.template:
+        src: burpsuite_response.varfile.j2
+        dest: "{{ _burpsuite_installer_tmpdir.path }}/burpsuite_response.varfile"
+        mode: '0640'
+
+    - name: Install Burp Suite
+      ansible.builtin.command:
+        cmd: "/bin/sh {{ _burpsuite_installer_script }} -q -varfile burpsuite_response.varfile -overwrite"
+        chdir: "{{ _burpsuite_installer_tmpdir.path }}"
+      changed_when: true
+
+  always:
+
+    - name: Remove temporary directory for installer files
+      ansible.builtin.file:
+        path: "{{ _burpsuite_installer_tmpdir.path }}"
+        state: absent

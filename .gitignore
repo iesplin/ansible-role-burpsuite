@@ -5,7 +5,8 @@ __pycache__/
 
 .cache
 
-# uv 
-pyproject.toml
-uv.lock
+# uv
 .venv/
+
+# ansible-lint
+.ansible/
