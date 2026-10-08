@@ -1,28 +1,27 @@
 ---
-- name: Removed burpsuite_release_channel variable is not set
-  ansible.builtin.assert:
-    that:
-      - burpsuite_release_channel is not defined
-    fail_msg: "burpsuite_release_channel has been replaced by burpsuite_early_adopter. Set burpsuite_early_adopter: true for the Early Adopter channel."
-    quiet: true
+- name: Warn that burpsuite_release_channel has been removed
+  ansible.builtin.debug:
+    msg: >-
+      WARNING: burpsuite_release_channel has been removed and is ignored.
+      Set burpsuite_early_adopter: true for the Early Adopter channel, otherwise Stable is installed.
+  when: burpsuite_release_channel is defined
 
-- name: Removed version and edition variables are not set
-  ansible.builtin.assert:
-    that:
-      - burpsuite_version is not defined
-      - burpsuite_edition is not defined
-      - burpsuite_installer_sha256_checksum is not defined
-    fail_msg: >-
-      burpsuite_version, burpsuite_edition and burpsuite_installer_sha256_checksum have been removed.
-      The latest release from the selected channel is always installed, and the edition is set by burpsuite_pro_license_key.
-    quiet: true
+- name: Warn that version and edition variables have been removed
+  ansible.builtin.debug:
+    msg: >-
+      WARNING: burpsuite_version, burpsuite_edition and burpsuite_installer_sha256_checksum have been removed and are ignored.
+      The latest release from the selected channel is always installed, and Professional edition is enabled by burpsuite_pro_license_key.
+  when: >-
+    burpsuite_version is defined or
+    burpsuite_edition is defined or
+    burpsuite_installer_sha256_checksum is defined
 
-- name: Removed burpsuite_install_dir variable is not set
-  ansible.builtin.assert:
-    that:
-      - burpsuite_install_dir is not defined
-    fail_msg: "burpsuite_install_dir has been removed. Burp Suite is always installed to ~/BurpSuite for the user running the role."
-    quiet: true
+- name: Warn that burpsuite_install_dir has been removed
+  ansible.builtin.debug:
+    msg: >-
+      WARNING: burpsuite_install_dir has been removed and is ignored.
+      Burp Suite is always installed to ~/BurpSuite for the user running the role.
+  when: burpsuite_install_dir is defined
 
 - name: Removed burpsuite_user variable is not set
   ansible.builtin.assert:

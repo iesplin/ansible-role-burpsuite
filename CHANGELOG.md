@@ -2,6 +2,12 @@
 
 All notable changes to this role are documented in this file.
 
+## [2.0.1] - 2026-10-08
+
+### Changed
+
+- Removed variables other than `burpsuite_user` now show a warning instead of failing the run, as they are ignored by the role. `burpsuite_user` still fails, because ignoring it would install Burp Suite for the wrong user.
+
 ## [2.0.0] - 2026-10-02
 
 ### Breaking changes
@@ -84,6 +90,7 @@ All notable changes to this role are documented in this file.
 - Merged the activation and CA public certificate download scripts.
 - Default installation to the user's home directory so Burp can perform automatic updates.
 
+[2.0.1]: https://github.com/iesplin/ansible-role-burpsuite/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/iesplin/ansible-role-burpsuite/compare/1.0.5...2.0.0
 [1.0.5]: https://github.com/iesplin/ansible-role-burpsuite/compare/1.0.4...1.0.5
 [1.0.4]: https://github.com/iesplin/ansible-role-burpsuite/compare/1.0.3...1.0.4
