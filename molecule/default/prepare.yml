@@ -9,6 +9,7 @@
           - libfontconfig1
           - libfreetype6
           - python3-pexpect
+          - xdg-utils
         state: present
         update_cache: true
       when: ansible_facts['os_family'] == 'Debian'
@@ -19,5 +20,6 @@
           - fontconfig
           - freetype
           - python3-pexpect
+          - xdg-utils
         state: present
       when: ansible_facts['os_family'] == 'RedHat'
