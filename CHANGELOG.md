@@ -2,6 +2,12 @@
 
 All notable changes to this role are documented in this file.
 
+## [2.0.2] - 2026-11-06
+
+### Fixed
+
+- Restored the Burp Suite desktop menu entry, which the 2.0.0 installer response file disabled.
+
 ## [2.0.1] - 2026-10-08
 
 ### Changed

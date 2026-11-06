@@ -53,3 +53,17 @@
         quiet: true
       vars:
         extender: "{{ (user_config.content | b64decode | from_json).user_options.extender }}"
+
+    - name: Find Burp Suite desktop menu entry
+      ansible.builtin.find:
+        paths: "{{ user_home }}/.local/share/applications"
+        patterns: "*.desktop"
+        contains: ".*BurpSuite.*"
+      register: desktop_entries
+
+    - name: Assert desktop menu entry exists
+      ansible.builtin.assert:
+        that:
+          - desktop_entries.matched > 0
+        fail_msg: "No Burp Suite desktop menu entry found in {{ user_home }}/.local/share/applications"
+        quiet: true
