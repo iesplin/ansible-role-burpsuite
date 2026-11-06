@@ -3,7 +3,7 @@ name = "ansible-role-burpsuite"
 version = "2.0.1"
 requires-python = ">=3.12"
 dependencies = [
-    "ansible>=13.0.0",
+    "ansible-core>=2.21.6",
     "ansible-lint>=26.9.0",
     "molecule>=25.11.0",
     "molecule-plugins[podman]>=25.8.12",
